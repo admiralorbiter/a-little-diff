@@ -20,7 +20,7 @@ def test_moosedev_adapter_parse_state_a():
     assert c1.kind == "Constraint"
     assert c1.title == "Teacher attendance constraint"
     assert c1.claim == "Teacher attendance must be entered manually."
-    assert c1.status == "active"
+    assert c1.status == "accepted"
     assert len(c1.evidence) == 1
     assert c1.evidence[0].source_type == "moosedev"
 
@@ -46,7 +46,8 @@ def test_moosedev_adapter_parse_state_b():
     adapter = MOOSEDevAdapter()
     state = adapter.parse_nquads(NQUADS_STATE_B, revision="rev_b")
 
-    assert len(state.records) == 4
+    # In State B: Constraint 1, Constraint 2, Rationale 1, Decision 1, Requirement 1
+    assert len(state.records) == 5
 
     c1 = state.get_record("urn:record:constraint:1")
     assert c1 is not None
@@ -56,10 +57,9 @@ def test_moosedev_adapter_parse_state_b():
     assert c2 is not None
     assert c2.kind == "Constraint"
     assert c2.title == "Pathful attendance import"
-    assert c2.status == "active"
-    assert len(c2.relations) == 1
-    assert c2.relations[0].predicate == "supersedes"
-    assert c2.relations[0].object_id == "urn:record:constraint:1"
+    assert c2.status == "accepted"
+    assert any(r.predicate == "supersedes" and r.object_id == "urn:record:constraint:1" for r in c2.relations)
+    assert any(r.predicate == "hasRationale" and r.object_id == "urn:record:rationale:1" for r in c2.relations)
 
 
 def test_moosedev_adapter_determinism():
@@ -107,8 +107,8 @@ def test_moosedev_adapter_load_from_git_repo(tmp_path: Path):
 
     state_a = adapter.load_state(repo, "state_a")
     assert len(state_a.records) == 3
-    assert state_a.get_record("urn:record:constraint:1").status == "active"
+    assert state_a.get_record("urn:record:constraint:1").status == "accepted"
 
     state_b = adapter.load_state(repo, "HEAD")
-    assert len(state_b.records) == 4
+    assert len(state_b.records) == 5
     assert state_b.get_record("urn:record:constraint:1").status == "superseded"

@@ -84,26 +84,20 @@ def diff(
 
     adapter = MOOSEDevAdapter()
 
-    warnings: list[str] = []
     if not adapter.can_load(repo, base_sha):
-        warnings.append(f"Knowledge snapshot missing at base revision {base_sha[:8]}")
-    if not adapter.can_load(repo, head_sha):
-        warnings.append(f"Knowledge snapshot missing at head revision {head_sha[:8]}")
-
-    if warnings and not (adapter.can_load(repo, base_sha) or adapter.can_load(repo, head_sha)):
-        err_console.print(f"[bold red]Error:[/bold red] No knowledge snapshot found at either revision in {repo.resolve()}")
+        err_console.print(f"[bold red]Cannot compute epistemic diff:[/bold red] base revision {base_sha[:8]} has no MOOSEDev snapshot.")
         raise typer.Exit(code=1)
 
-    base_state = adapter.load_state(repo, base_sha) if adapter.can_load(repo, base_sha) else None
-    head_state = adapter.load_state(repo, head_sha) if adapter.can_load(repo, head_sha) else None
+    if not adapter.can_load(repo, head_sha):
+        err_console.print(f"[bold red]Cannot compute epistemic diff:[/bold red] head revision {head_sha[:8]} has no MOOSEDev snapshot.")
+        raise typer.Exit(code=1)
+
+    base_state = adapter.load_state(repo, base_sha)
+    head_state = adapter.load_state(repo, head_sha)
 
     # Compute diff and downstream impacts
-    if base_state and head_state:
-        changes = diff_states(base_state, head_state)
-        impacts = find_impacts(changes, base_state, head_state)
-    else:
-        changes = []
-        impacts = []
+    changes = diff_states(base_state, head_state)
+    impacts = find_impacts(changes, base_state, head_state)
 
     report = DiffReport(
         base_revision=base_sha,
@@ -111,7 +105,7 @@ def diff(
         source="moosedev",
         changes=changes,
         impacts=impacts,
-        warnings=warnings,
+        warnings=[],
     )
 
     if json_output:

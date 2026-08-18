@@ -27,10 +27,10 @@ class EpistemicState(BaseModel):
 
     @property
     def active_records(self) -> dict[str, EpistemicRecord]:
-        """Filter records that are currently active (not superseded, retracted, or retired)."""
+        """Filter records that are currently authoritative and active (not retired or proposed/rejected)."""
         return {
             rid: rec for rid, rec in self.records.items()
-            if rec.status not in ("superseded", "retracted", "retired")
+            if rec.is_authoritative_active
         }
 
     def get_all_relations(self) -> list[Relation]:

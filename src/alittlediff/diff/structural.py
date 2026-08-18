@@ -47,7 +47,8 @@ def diff_states(
     # Check head records for outgoing 'supersedes' or 'replaces' relations pointing to base records
     for head_id, head_rec in head_state.records.items():
         for rel in head_rec.relations:
-            if rel.predicate.lower() in ("supersedes", "replaces"):
+            pred_lower = rel.predicate.lower()
+            if pred_lower in ("supersedes", "replaces"):
                 target_base_id = rel.object_id
                 base_rec = base_state.get_record(target_base_id)
                 if base_rec is not None:
@@ -61,6 +62,30 @@ def diff_states(
                     if rel.evidence:
                         evidence.extend(rel.evidence)
 
+                    # Absorb associated Rationale nodes linked via hasRationale
+                    rationale_text: str | None = None
+                    for h_rel in head_rec.relations:
+                        if h_rel.predicate.lower() in ("hasrationale", "rationale"):
+                            rat_rec = head_state.get_record(h_rel.object_id) or base_state.get_record(h_rel.object_id)
+                            if rat_rec is not None:
+                                handled_head_ids.add(rat_rec.id)
+                                handled_base_ids.add(rat_rec.id)
+                                rationale_text = rat_rec.claim or rat_rec.title or rat_rec.id
+                                if rat_rec.evidence:
+                                    evidence.extend(rat_rec.evidence)
+
+                    details: dict[str, Any] = {
+                        "superseded_id": target_base_id,
+                        "superseded_by": head_id,
+                        "relation_predicate": rel.predicate,
+                        "before_title": base_rec.title,
+                        "after_title": head_rec.title,
+                        "before_claim": base_rec.claim,
+                        "after_claim": head_rec.claim,
+                    }
+                    if rationale_text:
+                        details["rationale"] = rationale_text
+
                     changes.append(
                         EpistemicChange(
                             change_id=f"chg-superseded-{_clean_id(target_base_id)}",
@@ -69,17 +94,42 @@ def diff_states(
                             after=head_rec,
                             evidence=evidence,
                             judgment_source="deterministic",
-                            details={
-                                "superseded_id": target_base_id,
-                                "superseded_by": head_id,
-                                "relation_predicate": rel.predicate,
-                                "before_title": base_rec.title,
-                                "after_title": head_rec.title,
-                                "before_claim": base_rec.claim,
-                                "after_claim": head_rec.claim,
-                            },
+                            details=details,
                         )
                     )
+
+    # Check for inverse isSupersededBy on base or head records
+    for base_id, base_rec in base_state.records.items():
+        if base_id in handled_base_ids:
+            continue
+        head_rec = head_state.get_record(base_id)
+        if head_rec is not None:
+            for rel in head_rec.relations:
+                if rel.predicate.lower() == "issupersededby":
+                    superseding_id = rel.object_id
+                    superseding_rec = head_state.get_record(superseding_id)
+                    if superseding_rec is not None:
+                        handled_base_ids.add(base_id)
+                        handled_head_ids.add(superseding_id)
+                        changes.append(
+                            EpistemicChange(
+                                change_id=f"chg-superseded-{_clean_id(base_id)}",
+                                structural_type="superseded",
+                                before=base_rec,
+                                after=superseding_rec,
+                                evidence=list(superseding_rec.evidence) + list(base_rec.evidence),
+                                judgment_source="deterministic",
+                                details={
+                                    "superseded_id": base_id,
+                                    "superseded_by": superseding_id,
+                                    "relation_predicate": rel.predicate,
+                                    "before_title": base_rec.title,
+                                    "after_title": superseding_rec.title,
+                                    "before_claim": base_rec.claim,
+                                    "after_claim": superseding_rec.claim,
+                                },
+                            )
+                        )
 
     # Also check for base records whose status transitioned to 'superseded' in head
     for base_id, base_rec in base_state.records.items():

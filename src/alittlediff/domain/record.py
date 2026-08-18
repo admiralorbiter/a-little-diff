@@ -6,6 +6,11 @@ from alittlediff.domain.evidence import Evidence
 from alittlediff.domain.relation import Relation
 
 
+RETIRED_STATUSES = {"superseded", "retracted", "retired", "deprecated"}
+NON_AUTHORITATIVE_STATUSES = {"proposed", "rejected", "draft"}
+AUTHORITATIVE_ACTIVE_STATUSES = {"accepted", "active"}
+
+
 class EpistemicRecord(BaseModel):
     """An individual unit of project knowledge, belief, constraint, or decision."""
     id: str = Field(
@@ -25,8 +30,8 @@ class EpistemicRecord(BaseModel):
         description="Full proposition, description, or statement of belief.",
     )
     status: Optional[str] = Field(
-        default="active",
-        description="Lifecycle status (e.g. active, superseded, retracted, draft, retired).",
+        default="accepted",
+        description="Lifecycle status (e.g. accepted, active, superseded, deprecated, retracted, proposed, rejected).",
     )
     relations: list[Relation] = Field(
         default_factory=list,
@@ -40,3 +45,13 @@ class EpistemicRecord(BaseModel):
         default_factory=dict,
         description="Source-specific raw properties preserved for auditing.",
     )
+
+    @property
+    def is_authoritative_active(self) -> bool:
+        """Check if record is an authoritative, active project belief."""
+        if not self.status:
+            return True
+        st = self.status.lower()
+        if st in RETIRED_STATUSES or st in NON_AUTHORITATIVE_STATUSES:
+            return False
+        return True

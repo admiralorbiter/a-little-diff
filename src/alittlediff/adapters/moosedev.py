@@ -102,13 +102,13 @@ class MOOSEDevAdapter:
                     val = str(obj.value if obj.value is not None else obj)
                     
                     # Title properties
-                    if pred in (RDFS.label, DCTERMS.title, DC.title, SKOS.prefLabel) or pred_name.lower() in ("title", "label", "name"):
+                    if pred in (RDFS.label, DCTERMS.title, DC.title, SKOS.prefLabel) or pred_name.lower() in ("hastitle", "title", "label", "name"):
                         titles.append(val)
                     # Claim / Description properties
-                    elif pred in (RDFS.comment, DCTERMS.description, DC.description, SKOS.definition) or pred_name.lower() in ("claim", "description", "body", "proposition", "summary"):
+                    elif pred in (RDFS.comment, DCTERMS.description, DC.description, SKOS.definition) or pred_name.lower() in ("hasdescription", "description", "claim", "body", "proposition", "summary", "comment"):
                         claims.append(val)
-                    # Status properties
-                    elif pred_name.lower() in ("status", "hasstatus", "lifecyclestate", "lifecyclestatus", "state"):
+                    # Status / Lifecycle properties
+                    elif pred_name.lower() in ("haslifecyclestatus", "lifecyclestatus", "lifecyclestate", "hasstatus", "status", "state"):
                         statuses.append(val.lower())
                     else:
                         metadata.setdefault(pred_name, []).append(val)
@@ -145,7 +145,7 @@ class MOOSEDevAdapter:
             # Determine primary title, claim, and status
             primary_title = titles[0] if titles else None
             primary_claim = claims[0] if claims else None
-            primary_status = statuses[0] if statuses else "active"
+            primary_status = statuses[0] if statuses else "accepted"
 
             # Sort relations deterministically
             relations.sort(key=lambda r: (r.predicate, r.object_id))

@@ -61,10 +61,11 @@ def find_impacts(
 
         for trigger_id in trigger_ids:
             # 1. Reverse traversal: records that point TO trigger_id (e.g. Decision --isMotivatedBy--> Constraint)
-            # Check relations in both base_state and head_state to capture historical motivations
-            all_records = {**base_state.records, **head_state.records}
+            # Check relations in BOTH base_state AND head_state without overwriting to preserve historical motivations
+            candidate_records = list(base_state.records.values()) + list(head_state.records.values())
 
-            for rec_id, rec in all_records.items():
+            for rec in candidate_records:
+                rec_id = rec.id
                 if rec_id == trigger_id:
                     continue
 
@@ -104,10 +105,11 @@ def find_impacts(
     # 2-hop propagation if max_depth >= 2
     if max_depth >= 2:
         hop1_impacts = list(impacts)
+        candidate_records = list(base_state.records.values()) + list(head_state.records.values())
         for h1 in hop1_impacts:
             intermediate_id = h1.target_record_id
-            all_records = {**base_state.records, **head_state.records}
-            for rec_id, rec in all_records.items():
+            for rec in candidate_records:
+                rec_id = rec.id
                 if rec_id == intermediate_id or (h1.source_change_id, rec_id) in seen_impact_keys:
                     continue
                 for rel in rec.relations:
@@ -147,13 +149,13 @@ def _add_impact(
     if impact_key in seen_keys:
         return
 
-    # Check if target record is active in head_state
+    # Check if target record exists in head_state (or base_state)
     target_rec = head_state.get_record(target_id) or base_state.get_record(target_id)
     if not target_rec:
         return
 
-    # Suppress targets that are already superseded or retired
-    if target_rec.status in ("superseded", "retracted", "retired"):
+    # Suppress targets that are not authoritative or active (e.g. superseded, retired, deprecated, proposed, rejected)
+    if not target_rec.is_authoritative_active:
         return
 
     seen_keys.add(impact_key)
