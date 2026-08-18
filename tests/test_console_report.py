@@ -169,3 +169,68 @@ def test_cli_diff_console_output_supersession_and_impact(tmp_path: Path):
     assert "BELIEF SUPERSEDED" in result.stdout
     assert "RECONSIDER" in result.stdout
     assert "Manual attendance workflow" in result.stdout
+
+
+def test_console_report_grouped_low_confidence_impacts_normal_mode():
+    """Low-confidence concerns impacts should be collapsed into a compact grouped summary by default."""
+    out = io.StringIO()
+    console = Console(file=out, force_terminal=True, width=100)
+
+    ev = Evidence(source_type="git", path=".moosedev/kg.nq")
+    rec_c1 = EpistemicRecord(id="urn:rec:c1", kind="Constraint", claim="Changed constraint")
+    chg = EpistemicChange(change_id="chg-1", structural_type="modified", before=rec_c1, after=rec_c1)
+
+    tgt1 = EpistemicRecord(id="urn:comp:http", kind="SystemComponent", title="HTTP API")
+    tgt2 = EpistemicRecord(id="urn:comp:mcp", kind="SystemComponent", title="MCP Server")
+    tgt3 = EpistemicRecord(id="urn:code:fn1", kind="CodeEntity", title="parse_uri")
+
+    imp1 = Impact(impact_id="i1", source_change_id="chg-1", target_record_id="urn:comp:http", target_record=tgt1, confidence="low", effect="inspect")
+    imp2 = Impact(impact_id="i2", source_change_id="chg-1", target_record_id="urn:comp:mcp", target_record=tgt2, confidence="low", effect="inspect")
+    imp3 = Impact(impact_id="i3", source_change_id="chg-1", target_record_id="urn:code:fn1", target_record=tgt3, confidence="low", effect="inspect")
+
+    report = DiffReport(
+        base_revision="abc",
+        head_revision="def",
+        source="moosedev",
+        changes=[chg],
+        impacts=[imp1, imp2, imp3],
+    )
+
+    render_console_report(report, console=console, verbose=False)
+    output = out.getvalue()
+
+    assert "BROAD CONTEXT & COMPONENT ASSOCIATIONS (LOW CONFIDENCE)" in output
+    assert "SystemComponents (2):" in output
+    assert "HTTP API" in output
+    assert "MCP Server" in output
+    assert "CodeEntitys (1):" in output
+    assert "parse_uri" in output
+    # Must NOT render individual high/medium RECONSIDER cards for low-confidence items
+    assert "RECONSIDER (" not in output
+
+
+def test_console_report_grouped_low_confidence_impacts_verbose_mode():
+    """In verbose mode, low-confidence impacts render individual detailed cards."""
+    out = io.StringIO()
+    console = Console(file=out, force_terminal=True, width=100)
+
+    rec_c1 = EpistemicRecord(id="urn:rec:c1", kind="Constraint", claim="Changed constraint")
+    chg = EpistemicChange(change_id="chg-1", structural_type="modified", before=rec_c1, after=rec_c1)
+    tgt1 = EpistemicRecord(id="urn:comp:http", kind="SystemComponent", title="HTTP API")
+    imp1 = Impact(impact_id="i1", source_change_id="chg-1", target_record_id="urn:comp:http", target_record=tgt1, confidence="low", effect="inspect")
+
+    report = DiffReport(
+        base_revision="abc",
+        head_revision="def",
+        source="moosedev",
+        changes=[chg],
+        impacts=[imp1],
+    )
+
+    render_console_report(report, console=console, verbose=True)
+    output = out.getvalue()
+
+    # In verbose mode, full card is rendered
+    assert "RECONSIDER" in output
+    assert "LOW confidence" in output
+    assert "HTTP API" in output
