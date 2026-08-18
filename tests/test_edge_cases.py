@@ -105,3 +105,13 @@ def test_predicate_priority_hastitle_wins_over_rdfs_label():
     assert rec.title == "Correct title"
     assert rec.claim == "Correct description"
     assert rec.status == "accepted"
+
+
+def test_utf8_bom_handling():
+    """UTF-8 BOM at start of snapshot must be stripped cleanly without raising ParserError."""
+    bom_nquads = "\ufeff<urn:rec:bom> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:bom> <https://moosedev.org/ontology/hasTitle> \"BOM Test\" .\n"
+    adapter = MOOSEDevAdapter()
+    state = adapter.parse_nquads(bom_nquads, revision="rev_bom")
+    rec = state.get_record("urn:rec:bom")
+    assert rec is not None
+    assert rec.title == "BOM Test"

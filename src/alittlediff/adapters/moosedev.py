@@ -67,6 +67,7 @@ class MOOSEDevAdapter:
         file_path: str = ".moosedev/kg.nq",
     ) -> EpistemicState:
         """Parse raw N-Quads string into a deterministic EpistemicState."""
+        nquads_text = nquads_text.lstrip("\ufeff")
         dataset = rdflib.Dataset()
         try:
             dataset.parse(data=nquads_text, format="nquads")
