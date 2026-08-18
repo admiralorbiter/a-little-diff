@@ -146,7 +146,7 @@ pip install -e .
 Compare project understanding across any Git revision range:
 
 ```bash
-# Compare working tree or branch to baseline commit
+# Compare the current committed HEAD to a baseline
 alittlediff diff v0.1..HEAD
 
 # Output structured, machine-readable JSON
