@@ -74,22 +74,26 @@ class MOOSEDevAdapter:
             # Fallback to NTriples / general parser if dataset nquads parser encounters format quirks
             dataset.parse(data=nquads_text, format="nt")
 
-        # Collect all unique subject entities
-        subjects: set[URIRef] = {s for s in dataset.subjects() if isinstance(s, URIRef)}
+        # Collect all triples/quads grouped by subject across all named graphs
+        quads_by_subject: dict[URIRef, list[tuple[Any, Any]]] = {}
+        for s, p, o, _ in dataset.quads((None, None, None)):
+            if isinstance(s, URIRef):
+                quads_by_subject.setdefault(s, []).append((p, o))
 
         records: dict[str, EpistemicRecord] = {}
 
-        for subj in subjects:
+        for subj, pred_objs in quads_by_subject.items():
             subj_id = str(subj)
             types: list[str] = []
-            titles: list[str] = []
-            claims: list[str] = []
-            statuses: list[str] = []
+            # Priority-keyed title/claim/status buckets (lower number = higher priority)
+            title_candidates: dict[int, str] = {}
+            claim_candidates: dict[int, str] = {}
+            status_candidates: dict[int, str] = {}
             relations: list[Relation] = []
             metadata: dict[str, list[Any]] = {}
 
             # Examine all properties of this subject
-            for pred, obj in dataset.predicate_objects(subject=subj):
+            for pred, obj in pred_objs:
                 pred_str = str(pred)
                 pred_name = _extract_local_name(pred)
 
@@ -100,16 +104,37 @@ class MOOSEDevAdapter:
 
                 if isinstance(obj, RDFLiteral):
                     val = str(obj.value if obj.value is not None else obj)
-                    
-                    # Title properties
-                    if pred in (RDFS.label, DCTERMS.title, DC.title, SKOS.prefLabel) or pred_name.lower() in ("hastitle", "title", "label", "name"):
-                        titles.append(val)
-                    # Claim / Description properties
-                    elif pred in (RDFS.comment, DCTERMS.description, DC.description, SKOS.definition) or pred_name.lower() in ("hasdescription", "description", "claim", "body", "proposition", "summary", "comment"):
-                        claims.append(val)
-                    # Status / Lifecycle properties
-                    elif pred_name.lower() in ("haslifecyclestatus", "lifecyclestatus", "lifecyclestate", "hasstatus", "status", "state"):
-                        statuses.append(val.lower())
+                    pn = pred_name.lower()
+
+                    # Title properties (priority: hasTitle > dcterms:title > rdfs:label > skos:prefLabel > other)
+                    if pn == "hastitle":
+                        title_candidates.setdefault(0, val)
+                    elif pred == DCTERMS.title or pred == DC.title:
+                        title_candidates.setdefault(1, val)
+                    elif pred == RDFS.label or pn in ("label", "name"):
+                        title_candidates.setdefault(2, val)
+                    elif pred == SKOS.prefLabel:
+                        title_candidates.setdefault(3, val)
+                    elif pn == "title":
+                        title_candidates.setdefault(4, val)
+                    # Claim / Description properties (priority: hasDescription > dcterms:description > rdfs:comment > skos:definition > other)
+                    elif pn == "hasdescription":
+                        claim_candidates.setdefault(0, val)
+                    elif pred == DCTERMS.description or pred == DC.description:
+                        claim_candidates.setdefault(1, val)
+                    elif pred == RDFS.comment:
+                        claim_candidates.setdefault(2, val)
+                    elif pred == SKOS.definition:
+                        claim_candidates.setdefault(3, val)
+                    elif pn in ("description", "claim", "body", "proposition", "summary", "comment"):
+                        claim_candidates.setdefault(4, val)
+                    # Status / Lifecycle properties (priority: hasLifecycleStatus > hasStatus > other)
+                    elif pn == "haslifecyclestatus":
+                        status_candidates.setdefault(0, val.lower())
+                    elif pn in ("lifecyclestatus", "lifecyclestate"):
+                        status_candidates.setdefault(1, val.lower())
+                    elif pn in ("hasstatus", "status", "state"):
+                        status_candidates.setdefault(2, val.lower())
                     else:
                         metadata.setdefault(pred_name, []).append(val)
                 elif isinstance(obj, URIRef):
@@ -142,10 +167,10 @@ class MOOSEDevAdapter:
             elif types:
                 kind = types[0]
 
-            # Determine primary title, claim, and status
-            primary_title = titles[0] if titles else None
-            primary_claim = claims[0] if claims else None
-            primary_status = statuses[0] if statuses else "accepted"
+            # Determine primary title, claim, and status by priority
+            primary_title = title_candidates[min(title_candidates)] if title_candidates else None
+            primary_claim = claim_candidates[min(claim_candidates)] if claim_candidates else None
+            primary_status = status_candidates[min(status_candidates)] if status_candidates else "accepted"
 
             # Sort relations deterministically
             relations.sort(key=lambda r: (r.predicate, r.object_id))

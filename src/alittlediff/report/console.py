@@ -26,7 +26,7 @@ def render_console_report(
         verbose: Whether to show detailed evidence and metadata trees.
     """
     if console is None:
-        console = Console()
+        console = Console(legacy_windows=False)
 
     base_short = report.base_revision[:8]
     head_short = report.head_revision[:8]

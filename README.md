@@ -129,61 +129,85 @@ Git is an important source and transport, but it should not become the conceptua
 
 ---
 
-## Example target experience
+## Quick Start & CLI Usage
+
+### Installation
+
+Install in editable mode:
 
 ```bash
-alittlediff HEAD~12..HEAD
+git clone https://github.com/admiralorbiter/a-little-diff.git
+cd a-little-diff
+pip install -e .
 ```
 
-Possible output:
+### Running Epistemic Diffs
 
-```text
-A LITTLE DIFF
-3f991c → a88102
+Compare project understanding across any Git revision range:
 
-BELIEF SUPERSEDED
+```bash
+# Compare working tree or branch to baseline commit
+alittlediff diff v0.1..HEAD
 
-BEFORE
-  Constraint:
-  Teacher attendance must be entered manually.
+# Output structured, machine-readable JSON
+alittlediff diff v0.1..HEAD --json
 
-AFTER
-  Constraint:
-  Pathful provides teacher attendance through its import.
+# Enable full provenance and evidence trees
+alittlediff diff v0.1..HEAD --verbose
 
-CHANGE TYPE
-  World update — likely
-  The external system appears to have gained a capability.
-
-AFFECTED
-
-  → Manual attendance workflow
-      justified by the old constraint
-
-  → Teacher dashboard
-      depends on the workflow
-
-RECOMMENDATION
-
-  Re-evaluate whether the manual attendance workflow
-  remains necessary.
-
-WHY THIS WAS FLAGGED
-
-  Old constraint ─isMotivatedBy⁻¹→ Manual workflow
-                 ─concerns→ Teacher dashboard
-
-EVIDENCE
-  commit abc123
-  .moosedev record <...>
+# Run against an external repository
+alittlediff diff 4f76c5bc..2b7d733d --repo /path/to/project
 ```
-
-The report may eventually be much richer, but the experience should stay understandable.
 
 ---
 
-## Documentation map
+## Example Output
 
+```text
+════════════════════════════════════════════════════════════
+ A LITTLE DIFF  (moosedev)
+ 4f76c5bc ──► 2b7d733d
+════════════════════════════════════════════════════════════
+
+71 meaningful knowledge changes  •  55 explicit supersessions  •  54 downstream items worth inspecting
+
+╭──────────────────────── BELIEF SUPERSEDED ────────────────────────╮
+│ BEFORE: Constraint                                                │
+│   Teacher attendance must be entered manually.                    │
+│                                                                   │
+│ AFTER:  Constraint                                                │
+│   Pathful provides teacher attendance through its import.         │
+╰───────────────────────────────────────────────────────────────────╯
+
+▼ DOWNSTREAM ITEMS WORTH RECONSIDERING
+
+╭──────────────────────── RECONSIDER (HIGH confidence) ────────────────────────╮
+│ Target: Decision: Manual attendance workflow                                  │
+│ Claim: Build a manual entry screen for teachers to submit attendance daily.  │
+│ Effect: Justification May Have Changed                                       │
+│ Path: (isMotivatedBy)                                                        │
+│ Why: Motivating premise changed.                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+```
+
+---
+
+## Current Status
+
+- [x] **Milestone 0: Scaffold & CLI:** Typer CLI with clean error handling and version flags.
+- [x] **Milestone 1: Git Snapshot Loader:** Isolated `git show <ref>:.moosedev/kg.nq` loading without repository checkout.
+- [x] **Milestone 2: MOOSEDev Normalization:** Deterministic N-Quads parsing supporting named graphs (`dataset.quads`) and prioritized predicate extraction (`hasTitle > dcterms:title > rdfs:label`).
+- [x] **Milestone 3: Structural Diff & JSON Reporting:** High-level lifecycle supersession collapsing and structured JSON serialization.
+- [x] **Milestone 4: Rich Terminal Console Report:** Formatted before/after cards and downstream reconsider panels.
+- [x] **Milestone 5: Policy-Driven Impact Engine:** Conservative typed relationship propagation (`isMotivatedBy`, `constrains`, `dependsOn`, `resultsIn`, `concerns`, `justifiedBy`) preserving historical motivations.
+- [x] **Milestone 6: Real-Project Evaluation:** Live-verified against 3,334 production knowledge records in `Trivyn/moosedev`.
+- [x] **Golden Test Suite:** 49 tests passing at 95% total code coverage.
+
+---
+
+## Documentation Map
+
+- [`docs/V0_EVALUATION_REPORT.md`](docs/V0_EVALUATION_REPORT.md) — comprehensive real-world trial report and evaluation synthesis.
 - [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md) — purpose, product model, terminology, scope, non-goals, and long-term vision.
 - [`docs/RESEARCH_FOUNDATIONS.md`](docs/RESEARCH_FOUNDATIONS.md) — research synthesis and the specific features or design rules it suggests.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — proposed technical architecture, data model, MOOSEDev seam, Ollama integration, and package layout.

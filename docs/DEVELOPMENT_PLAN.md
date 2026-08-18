@@ -474,17 +474,17 @@ Every generated explanation remains secondary to the structured path.
 
 V0 is complete when:
 
-- [ ] arbitrary Git refs can be loaded;
-- [ ] MOOSEDev snapshots normalize deterministically;
-- [ ] structural changes are correctly classified;
-- [ ] explicit supersessions/retractions render cleanly;
-- [ ] conservative downstream impact works for a verified relation subset;
-- [ ] every reported consequence carries a support path/evidence;
-- [ ] CLI has console and JSON output;
-- [ ] model use is optional;
-- [ ] at least one real-project trial has been manually evaluated;
-- [ ] a small golden corpus protects against regression;
-- [ ] documentation states known limitations.
+- [x] arbitrary Git refs can be loaded;
+- [x] MOOSEDev snapshots normalize deterministically;
+- [x] structural changes are correctly classified;
+- [x] explicit supersessions/retractions render cleanly;
+- [x] conservative downstream impact works for a verified relation subset;
+- [x] every reported consequence carries a support path/evidence;
+- [x] CLI has console and JSON output;
+- [x] model use is optional;
+- [x] at least one real-project trial has been manually evaluated (see [`docs/V0_EVALUATION_REPORT.md`](V0_EVALUATION_REPORT.md));
+- [x] a small golden corpus protects against regression (49 passing tests);
+- [x] documentation states known limitations.
 
 Do not declare V0 complete merely because the CLI runs.
 

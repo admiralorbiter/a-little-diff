@@ -84,3 +84,24 @@ def test_revision_range_parsing_edge_cases(temp_git_repo: Path):
     # Empty ref
     with pytest.raises(UnknownRevisionError):
         resolve_ref(temp_git_repo, "   ")
+
+
+def test_predicate_priority_hastitle_wins_over_rdfs_label():
+    """hasTitle must win over rdfs:label regardless of RDFLib iteration order."""
+    nquads = """
+<urn:rec:p1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .
+<urn:rec:p1> <http://www.w3.org/2000/01/rdf-schema#label> "Label fallback" .
+<urn:rec:p1> <https://moosedev.org/ontology/hasTitle> "Correct title" .
+<urn:rec:p1> <http://www.w3.org/2000/01/rdf-schema#comment> "Comment fallback" .
+<urn:rec:p1> <https://moosedev.org/ontology/hasDescription> "Correct description" .
+<urn:rec:p1> <https://moosedev.org/ontology/status> "active" .
+<urn:rec:p1> <https://moosedev.org/ontology/hasLifecycleStatus> "accepted" .
+""".strip()
+
+    adapter = MOOSEDevAdapter()
+    state = adapter.parse_nquads(nquads, revision="rev_priority")
+    rec = state.get_record("urn:rec:p1")
+    assert rec is not None
+    assert rec.title == "Correct title"
+    assert rec.claim == "Correct description"
+    assert rec.status == "accepted"

@@ -1,7 +1,19 @@
+import sys
 from typing import Optional
 from pathlib import Path
 import typer
 from rich.console import Console
+
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+if hasattr(sys.stderr, "reconfigure"):
+    try:
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 from alittlediff import __version__
 from alittlediff.adapters.moosedev import MOOSEDevAdapter
@@ -19,8 +31,8 @@ app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
 )
-console = Console()
-err_console = Console(stderr=True)
+console = Console(legacy_windows=False)
+err_console = Console(stderr=True, legacy_windows=False)
 
 
 def version_callback(value: bool):
