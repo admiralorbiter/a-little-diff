@@ -62,9 +62,43 @@ def render_console_report(
 
     # Section 2: Downstream Impacts
     if report.impacts:
-        console.print("\n[bold magenta]▼ DOWNSTREAM ITEMS WORTH RECONSIDERING[/bold magenta]\n")
-        for imp in report.impacts:
+        high_med_impacts = [i for i in report.impacts if i.confidence in ("high", "medium")]
+        low_impacts = [i for i in report.impacts if i.confidence == "low"]
+
+        if high_med_impacts or low_impacts:
+            console.print("\n[bold magenta]▼ DOWNSTREAM ITEMS WORTH RECONSIDERING[/bold magenta]\n")
+
+        for imp in high_med_impacts:
             _render_impact_card(imp, console, verbose=verbose)
+
+        if low_impacts:
+            if verbose:
+                for imp in low_impacts:
+                    _render_impact_card(imp, console, verbose=verbose)
+            else:
+                # Group low-confidence targets by kind compactly
+                grouped_targets: dict[str, list[str]] = {}
+                for imp in low_impacts:
+                    t = imp.target_record
+                    kind = t.kind if t else "Record"
+                    title = (t.title or imp.target_record_id) if t else imp.target_record_id
+                    if title not in grouped_targets.setdefault(kind, []):
+                        grouped_targets[kind].append(title)
+
+                summary_lines = []
+                for kind, titles in sorted(grouped_targets.items()):
+                    items_str = ", ".join(escape(t) for t in titles[:5])
+                    suffix = f" ... (+{len(titles) - 5} more)" if len(titles) > 5 else ""
+                    summary_lines.append(f"[bold cyan]{kind}s ({len(titles)}):[/bold cyan] {items_str}{suffix}")
+
+                console.print(
+                    Panel(
+                        "\n".join(summary_lines),
+                        title="[dim]BROAD CONTEXT & COMPONENT ASSOCIATIONS (LOW CONFIDENCE)[/dim]",
+                        border_style="dim",
+                        expand=False,
+                    )
+                )
 
     console.print()
 

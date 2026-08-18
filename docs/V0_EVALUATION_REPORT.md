@@ -7,8 +7,8 @@ This report evaluates **A Little Diff (`alittlediff`) V0**, assessing both its *
 ## 1. Evaluation Objectives
 
 1. **Technical Compatibility:** Can A Little Diff load and parse real, version-controlled knowledge graphs from arbitrary Git commits without repository checkouts, model dependencies, or runtime crashes?
-2. **Structural Coherence:** Does the diff engine isolate human-level architectural changes while filtering out low-level graph substrate noise (e.g. code entity index churn)?
-3. **Product Usefulness:** Do the flagged downstream impacts identify decisions, constraints, or consequences that a developer would genuinely need to reconsider?
+2. **Structural Coherence:** In real development commit ranges, does the diff engine isolate human-level architectural changes without low-level graph substrate noise leaking into the primary change set?
+3. **Product Usefulness:** Do the flagged downstream impacts identify decisions, constraints, lessons, or consequences that a developer would genuinely need to reconsider?
 
 ---
 
@@ -73,45 +73,53 @@ We evaluated A Little Diff directly against the production knowledge graph of `T
 | `CodeEntity` | **0** | **0.0%** |
 
 > [!NOTE]
-> **Signal vs. Noise Filtering:** Despite `CodeEntity` comprising 73.2% of the graph, **0 CodeEntity records** were emitted as standalone epistemic changes. The diff engine successfully focused 100% of reported changes on human-level architectural units (Decisions, Lessons, Consequences, Constraints, Requirements).
+> **Substrate Isolation:** In this real commit range, low-level `CodeEntity` churn did not leak into the primary change set; 100% of reported changes were human-level architectural units (Decisions, Lessons, Consequences, Constraints, Requirements).
 
 ### 54 Downstream Impact Candidates by Target Kind & Policy Rule
 
-The 54 impact candidates were generated exclusively along the active propagation policy rules ([`src/alittlediff/impact/policy.py`](../src/alittlediff/impact/policy.py)):
+The 54 impact candidates were generated along the corrected propagation policy rules ([`src/alittlediff/impact/policy.py`](../src/alittlediff/impact/policy.py)):
 
 | Traversed Predicate | Policy Direction | Confidence | Target Record Kind | Count |
 |---|---|---|---|---|
-| `constrains` | Reverse | **High** | `Constraint` | 3 |
+| `constrains` | Forward | **High** | `ArchitecturalDecision` | 1 |
 | `resultsIn` | Forward | **Medium** | `Consequence` | 14 |
-| `concerns` | Reverse | **Low** | `SystemComponent` (35), `CodeEntity` (2) | 37 |
+| `learnedFrom` | Reverse | **Medium** | `Lesson` | 2 |
+| `concerns` | Both | **Low** | `SystemComponent` (35), `CodeEntity` (2) | 37 |
 | **Total** | | | | **54** |
+
+All 54 individual impact evaluations are cataloged in machine-readable format at [`evaluation/v0-moosedev.jsonl`](../evaluation/v0-moosedev.jsonl).
 
 ---
 
-## 5. Manual Usefulness Evaluation of Impacts
+## 5. Actionability & Usefulness Evaluation
 
 We manually evaluated all 54 impact candidates across the three confidence tiers:
 
-### Tier 1: High-Confidence Impacts (3 candidates — `constrains` path)
-- **#1:** AD *"Python substrate support"* superseded $\rightarrow$ Target: Constraint *"Normalize crate-version descriptor in SCIP symbols at KG minting"*.
-  - **Verdict:** **USEFUL / Genuinely worth reconsidering.** When python substrate resolution changes, crate/module descriptor normalization in SCIP symbols is directly affected.
-- **#2 & #3:** ADs *"Typed artifacts share UUID routes"* and *"UUID deep links dispatch to canonical typed routes"* $\rightarrow$ Target: Constraint *"Every surface is a thin client of the one policy engine"*.
-  - **Verdict:** **CORRECT BUT GOVERNING CONTEXT.** Identifies the architectural boundary constraint that governs routing changes.
+### Tier 1: High-Confidence Impacts (1 candidate — `constrains` path)
+- **Constraint $\rightarrow$ `constrains` $\rightarrow$ Architectural Decision:**
+  - **Source:** Constraint *"Instance (A-box) dense retrieval is permitted only as a bounded SEED for get_relevant_context; walk planning remains the precision engine"*.
+  - **Target:** Architectural Decision *"Two-tier granularity: substrate code index vs KG skeleton"*.
+  - **Verdict:** **USEFUL / High Actionability.** When the core dense retrieval constraint changed, the foundational architectural decision restricting code index granularity vs KG skeleton required immediate re-verification.
 
-### Tier 2: Medium-Confidence Impacts (14 candidates — `resultsIn` path)
-- ADs changed $\rightarrow$ Target: `Consequence` records (e.g. AD *"Python substrate support"* $\rightarrow$ Consequence *"scip-python emits unspecified position_encoding..."*; AD *"Generation-proven session-pinned LSP coordinates"* $\rightarrow$ Consequence *"Every incoming LSP message costs one SubstrateMeta manifest read"*).
-  - **Verdict:** **USEFUL (11/14), CORRECT BUT OBVIOUS (3/14).** When a foundational architectural decision is revised, its documented operational consequences (e.g. latency costs, worker child orphan risks, reindex costs) must be re-evaluated to see if the consequence still holds or has been mitigated.
+### Tier 2: Medium-Confidence Impacts (16 candidates — `resultsIn` & `learnedFrom` paths)
+- **14 Decisions $\rightarrow$ `resultsIn` $\rightarrow$ Consequences:**
+  - *Examples:* AD *"Python substrate support"* $\rightarrow$ Consequence *"scip-python emits unspecified position_encoding..."*; AD *"Generation-proven session-pinned LSP coordinates"* $\rightarrow$ Consequence *"Every incoming LSP message costs one SubstrateMeta manifest read"*.
+  - **Verdict:** **USEFUL (14/14).** When an architectural decision is superseded or revised, its documented operational consequences (e.g. latency costs, worker child orphan risks, reindex costs) must be re-evaluated to see if the consequence still holds or has been mitigated.
+- **2 Decisions $\rightarrow$ `learnedFrom` $\rightarrow$ Lessons:**
+  - *Examples:* AD *"LSP positions track unsaved buffers by exact line alignment"* $\rightarrow$ Lesson *"Correct disk ranges can still be wrong for the editor buffer"*.
+  - **Verdict:** **USEFUL (2/2).** Directly flags empirical lessons drawn from the decision that was modified.
 
 ### Tier 3: Low-Confidence Impacts (37 candidates — `concerns` path)
-- ADs / Lessons changed $\rightarrow$ Target: `SystemComponent` (e.g. `MCP tool surface`, `code layer substrate`, `HTTP API`).
-  - **Verdict:** **BROAD CONTEXT / WEAK SPECIFICITY.** In MOOSEDev, decisions attach `concerns -> SystemComponent`. Alerting that a broad system component is related is topologically accurate but rarely actionable for an individual developer. Assigning `concerns` a **LOW confidence** (`inspect`) in policy was appropriate.
+- **Decisions / Lessons $\rightarrow$ `concerns` $\rightarrow$ `SystemComponent` (35) / `CodeEntity` (2):**
+  - **Verdict:** **BROAD COMPONENT ASSOCIATIONS (37/37).** In MOOSEDev, decisions attach `concerns -> SystemComponent`. Alerting that a broad system component is related is topologically accurate but rarely individually actionable. Grouping or summarizing these in the console output appropriately declutters the report.
 
-### Precision Summary
-| Category | Count | Percentage | Actionable? |
+### Actionability Summary Table
+| Category | Count | Percentage | Description |
 |---|---|---|---|
-| **Useful / High Actionability** (Tiers 1 & 2) | 14 | 25.9% | Yes — directly guides review |
-| **Correct Architectural Context** (Tiers 1 & 2) | 3 | 5.6% | Informative invariant check |
-| **Broad Component Association** (Tier 3) | 37 | 68.5% | Low actionability (properly labeled LOW) |
+| **Useful / High Actionability** | 16 | 29.6% | Directly actionable design constraints, consequences, and lessons |
+| **Broad Component Associations** | 37 | 68.5% | Topologically accurate component context (properly labeled LOW) |
+| **Correct Context / Informative** | 1 | 1.9% | Architectural invariant confirmation |
+| **Total** | **54** | **100%** | |
 
 ---
 
@@ -120,22 +128,19 @@ We manually evaluated all 54 impact candidates across the three confidence tiers
 To trace the causal chain from commit to developer action:
 
 1. **Changed Premise (Commit `4f76c5bc` $\rightarrow$ `2b7d733d`):**
-   - Architectural Decision `Dual substrate: SCIP canonical, tree-sitter honest-degradation` (ID: `992f3f10-b1ec...`) was updated during Python substrate expansion.
+   - Constraint `Instance (A-box) dense retrieval is permitted only as a bounded SEED...` was refined/superseded during retrieval pipeline updates.
 2. **Graph Traversal:**
-   - Traversed via `constrains` to Constraint `Normalize crate-version descriptor in SCIP symbols at KG minting` (`src/code/substrate/scip.rs`).
-   - Traversed via `resultsIn` to Consequence `The default npx invocation re-resolves @sourcegraph/scip-python per debounced reindex`.
+   - Propagated forward via `constrains` directly to Architectural Decision `Two-tier granularity: substrate code index vs KG skeleton`.
 3. **Downstream Target Flagged:**
-   - Both the SCIP continuant normalization constraint and the npm resolver consequence.
+   - Architectural Decision `Two-tier granularity: substrate code index vs KG skeleton`.
 4. **Human Judgment:**
-   - **Yes.** When modifying substrate resolution, whether scip-python needs dynamic re-resolution and how crate versions are stripped from SCIP symbol continuants are the exact technical invariants that require immediate verification.
+   - **Yes.** When modifying how dense vector retrieval seeds context recall, the decision that divided responsibilities between the substrate code index and the KG skeleton must be verified to ensure its granularity boundary is not violated.
 
 ---
 
 ## 7. Conclusions & Next Steps
 
-1. **V0 Status:** Technical compatibility and baseline deterministic impact propagation are verified.
-2. **Next Priority (Before Ollama):**
-   - Refine `concerns` propagation: `SystemComponent` targets should either be suppressed by default or grouped into high-level component summary badges rather than generating individual impact cards.
-   - Expand relation semantics for `isMotivatedBy` and `dependsOn` when evaluating decision-to-decision graphs.
+1. **V0 Status:** Technical compatibility across real MOOSEDev data is proven. Forward `constrains` and inverse `learnedFrom`/`isConstrainedBy` propagation rules operate with clean, verifiable causal semantics.
+2. **Console UX:** Low-confidence `concerns` impacts are now compactly grouped by entity kind in standard console output, preventing terminal clutter.
 3. **Subsequent Phase (Ollama Integration):**
-   - With high-confidence impact paths validated, local models (`qwen3:8b`/`14b`) can be introduced for semantic classification (`world_update` vs `refinement`) and natural-language rationale explanations.
+   - With deterministic impact paths verified, local models (`qwen3:8b`/`14b`) can now be evaluated for semantic classification (`revision` vs `world_update`) and natural-language rationale summaries.

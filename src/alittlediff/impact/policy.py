@@ -49,17 +49,24 @@ DEFAULT_PROPAGATION_RULES: dict[str, PropagationRule] = {
     ),
     "constrains": PropagationRule(
         predicate="constrains",
-        direction="reverse",
-        effect="constraint_context_changed",
-        confidence="high",
-        description="A governing constraint for this decision or requirement changed.",
-    ),
-    "constrainedBy": PropagationRule(
-        predicate="constrainedBy",
         direction="forward",
         effect="constraint_context_changed",
         confidence="high",
-        description="A governing constraint for this item changed.",
+        description="A governing constraint for this decision, component, or item changed.",
+    ),
+    "isConstrainedBy": PropagationRule(
+        predicate="isConstrainedBy",
+        direction="reverse",
+        effect="constraint_context_changed",
+        confidence="high",
+        description="A governing constraint for this decision, component, or item changed.",
+    ),
+    "constrainedBy": PropagationRule(
+        predicate="constrainedBy",
+        direction="reverse",
+        effect="constraint_context_changed",
+        confidence="high",
+        description="A governing constraint for this decision, component, or item changed.",
     ),
     "dependsOn": PropagationRule(
         predicate="dependsOn",
@@ -74,6 +81,20 @@ DEFAULT_PROPAGATION_RULES: dict[str, PropagationRule] = {
         effect="consequence_may_have_changed",
         confidence="medium",
         description="An item that produces this consequence was modified or superseded.",
+    ),
+    "resultsFrom": PropagationRule(
+        predicate="resultsFrom",
+        direction="reverse",
+        effect="consequence_may_have_changed",
+        confidence="medium",
+        description="The decision producing this consequence was modified or superseded.",
+    ),
+    "learnedFrom": PropagationRule(
+        predicate="learnedFrom",
+        direction="reverse",
+        effect="lesson_context_changed",
+        confidence="medium",
+        description="The architectural decision from which this lesson was drawn changed.",
     ),
     "concerns": PropagationRule(
         predicate="concerns",
