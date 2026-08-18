@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "alittlediff"
+version = "0.1.0"
+description = "An epistemic diff tool for comparing project understanding across Git revisions"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "typer>=0.12.0",
+    "pydantic>=2.0",
+    "rdflib>=7.0",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+model = [
+    "ollama>=0.4.0",
+]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+alittlediff = "alittlediff.cli:app"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning:rdflib.*",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
