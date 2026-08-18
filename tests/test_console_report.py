@@ -200,10 +200,10 @@ def test_console_report_grouped_low_confidence_impacts_normal_mode():
     output = out.getvalue()
 
     assert "BROAD CONTEXT & COMPONENT ASSOCIATIONS (LOW CONFIDENCE)" in output
-    assert "SystemComponents (2):" in output
+    assert "SystemComponent (2):" in output
     assert "HTTP API" in output
     assert "MCP Server" in output
-    assert "CodeEntitys (1):" in output
+    assert "CodeEntity (1):" in output
     assert "parse_uri" in output
     # Must NOT render individual high/medium RECONSIDER cards for low-confidence items
     assert "RECONSIDER (" not in output

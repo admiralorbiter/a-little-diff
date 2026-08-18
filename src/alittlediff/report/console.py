@@ -89,7 +89,7 @@ def render_console_report(
                 for kind, titles in sorted(grouped_targets.items()):
                     items_str = ", ".join(escape(t) for t in titles[:5])
                     suffix = f" ... (+{len(titles) - 5} more)" if len(titles) > 5 else ""
-                    summary_lines.append(f"[bold cyan]{kind}s ({len(titles)}):[/bold cyan] {items_str}{suffix}")
+                    summary_lines.append(f"[bold cyan]{kind} ({len(titles)}):[/bold cyan] {items_str}{suffix}")
 
                 console.print(
                     Panel(
