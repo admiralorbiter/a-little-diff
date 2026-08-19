@@ -1,4 +1,4 @@
-﻿import json
+import json
 from pathlib import Path
 import pytest
 
@@ -31,7 +31,7 @@ def test_benchmark_manifest_oracle(manifest_path: Path):
         if "structural_type" in exp_chg:
             assert actual_chg.structural_type == exp_chg["structural_type"]
 
-    # Validate impacts
+    # Validate impacts (Core Bench deterministic pass criteria)
     expected_impacts = data.get("expected_impacts", [])
     assert len(impacts) == len(expected_impacts), (
         f"Manifest {data['id']}: expected {len(expected_impacts)} impacts, got {len(impacts)}"
@@ -43,6 +43,8 @@ def test_benchmark_manifest_oracle(manifest_path: Path):
             assert actual_imp.effect == exp_imp["effect"]
         if "confidence" in exp_imp:
             assert actual_imp.confidence == exp_imp["confidence"]
+        if "predicate" in exp_imp and actual_imp.path:
+            assert any(r.predicate == exp_imp["predicate"] for r in actual_imp.path)
 
     # Validate non-impacts
     for non_impact_id in data.get("expected_non_impacts", []):

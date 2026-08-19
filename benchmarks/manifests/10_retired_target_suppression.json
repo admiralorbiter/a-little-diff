@@ -7,7 +7,8 @@
   "state_b_nquads": "<urn:rec:con:auth> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:auth> <https://moosedev.org/ontology/hasTitle> \"OAuth token expiry 1 hour\" .\n<urn:rec:con:auth> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:con:auth> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:con:auth_v2> .\n\n<urn:rec:con:auth_v2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:auth_v2> <https://moosedev.org/ontology/hasTitle> \"OAuth token expiry 24 hours\" .\n<urn:rec:con:auth_v2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:auth_v2> <https://moosedev.org/ontology/supersedes> <urn:rec:con:auth> .\n\n<urn:rec:dec:session> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:session> <https://moosedev.org/ontology/hasTitle> \"In-memory token caching\" .\n<urn:rec:dec:session> <https://moosedev.org/ontology/hasLifecycleStatus> \"retracted\" .",
   "expected_changes": [
     {
-      "structural_type": "superseded"
+      "structural_type": "superseded",
+      "semantic_type": "semantic_noop"
     }
   ],
   "expected_impacts": [],

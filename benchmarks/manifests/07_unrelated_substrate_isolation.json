@@ -2,7 +2,7 @@
   "id": "07_unrelated_substrate_isolation",
   "name": "Substrate CodeEntity Noise Isolation",
   "category": "semantic_noop",
-  "description": "Adding CodeEntity churn does not leak into primary architectural report.",
+  "description": "Adding unrelated CodeEntity churn must not alter the primary architectural change set or downstream impact set.",
   "state_a_nquads": "<urn:rec:req:auth> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Requirement> .\n<urn:rec:req:auth> <https://moosedev.org/ontology/hasTitle> \"Session token security\" .\n<urn:rec:req:auth> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .",
   "state_b_nquads": "<urn:rec:req:auth> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Requirement> .\n<urn:rec:req:auth> <https://moosedev.org/ontology/hasTitle> \"Session token security\" .\n<urn:rec:req:auth> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n\n<urn:code:fn:login> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/CodeEntity> .\n<urn:code:fn:login> <https://moosedev.org/ontology/hasTitle> \"handle_login\" .\n<urn:code:fn:logout> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/CodeEntity> .\n<urn:code:fn:logout> <https://moosedev.org/ontology/hasTitle> \"handle_logout\" .",
   "expected_changes": [

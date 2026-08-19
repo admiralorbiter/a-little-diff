@@ -7,7 +7,8 @@
   "state_b_nquads": "<urn:rec:con:immutable> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:immutable> <https://moosedev.org/ontology/hasTitle> \"Audit logs are append-only\" .\n<urn:rec:con:immutable> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:immutable> <https://moosedev.org/ontology/constrains> <urn:rec:dec:storage> .\n\n<urn:rec:dec:storage> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:storage> <https://moosedev.org/ontology/hasTitle> \"Local SQLite log store\" .\n<urn:rec:dec:storage> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:dec:storage> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:dec:storage_s3> .\n\n<urn:rec:dec:storage_s3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:storage_s3> <https://moosedev.org/ontology/hasTitle> \"S3 Glacier compliant log store\" .\n<urn:rec:dec:storage_s3> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:storage_s3> <https://moosedev.org/ontology/supersedes> <urn:rec:dec:storage> .",
   "expected_changes": [
     {
-      "structural_type": "superseded"
+      "structural_type": "superseded",
+      "semantic_type": "refinement"
     }
   ],
   "expected_impacts": [],

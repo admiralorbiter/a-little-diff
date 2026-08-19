@@ -7,7 +7,8 @@
   "state_b_nquads": "<urn:rec:con:strict> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:strict> <https://moosedev.org/ontology/hasTitle> \"Strict tenant scoping\" .\n<urn:rec:con:strict> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:con:strict> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:con:strict_v2> .\n\n<urn:rec:con:strict_v2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:strict_v2> <https://moosedev.org/ontology/hasTitle> \"Strict tenant scoping with org inheritance\" .\n<urn:rec:con:strict_v2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:strict_v2> <https://moosedev.org/ontology/supersedes> <urn:rec:con:strict> .\n\n<urn:rec:dec:queries> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:queries> <https://moosedev.org/ontology/hasTitle> \"Portal query handlers\" .\n<urn:rec:dec:queries> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:queries> <https://moosedev.org/ontology/isConstrainedBy> <urn:rec:con:strict> .",
   "expected_changes": [
     {
-      "structural_type": "superseded"
+      "structural_type": "superseded",
+      "semantic_type": "refinement"
     }
   ],
   "expected_impacts": [

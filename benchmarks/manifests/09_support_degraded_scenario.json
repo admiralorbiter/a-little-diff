@@ -7,7 +7,8 @@
   "state_b_nquads": "<urn:rec:con:p1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:p1> <https://moosedev.org/ontology/hasTitle> \"Premise 1: Direct file sync\" .\n<urn:rec:con:p1> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:con:p1> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:con:p1_api> .\n\n<urn:rec:con:p1_api> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:p1_api> <https://moosedev.org/ontology/hasTitle> \"Premise 1: Webhook sync\" .\n<urn:rec:con:p1_api> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:p1_api> <https://moosedev.org/ontology/supersedes> <urn:rec:con:p1> .\n\n<urn:rec:req:p2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Requirement> .\n<urn:rec:req:p2> <https://moosedev.org/ontology/hasTitle> \"Premise 2: Real-time dashboard view\" .\n<urn:rec:req:p2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n\n<urn:rec:dec:sync> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:sync> <https://moosedev.org/ontology/hasTitle> \"Dual WebSocket and File Sync\" .\n<urn:rec:dec:sync> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:sync> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:con:p1> .\n<urn:rec:dec:sync> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:req:p2> .",
   "expected_changes": [
     {
-      "structural_type": "superseded"
+      "structural_type": "superseded",
+      "semantic_type": "refinement"
     }
   ],
   "expected_impacts": [
@@ -18,6 +19,10 @@
       "predicate": "isMotivatedBy"
     }
   ],
+  "future_target": {
+    "effect": "support_degraded",
+    "detail": "1 of 2 explicit supports remains active (urn:rec:req:p2)."
+  },
   "expected_non_impacts": [],
   "metamorphic_invariants": [
     "line_order_permutation"

@@ -15,26 +15,28 @@ flowchart TD
     end
 
     CB -->|"Oracle Inputs (A/B N-Quads)"| ENG["alittlediff Deterministic Core"]
-    ENG -->|"Compare with Oracle JSON"| RES_CB["Core Precision & Recall"]
+    ENG -->|"Compare with Core Oracle"| RES_CB["Core Precision & Recall"]
 
     CAP -->|"Scenario Prose & Rules"| SUBSTRATE["Knowledge Capture (MOOSEDev)"]
     SUBSTRATE -->|"Verify Graph Completeness"| RES_CAP["Capture / Modeling Fidelity"]
 
     SB -->|"Bounded Transition Pairs"| MODEL["Semantic Classifier (LLM/Ollama)"]
-    MODEL -->|"Classify (refinement, revision, etc.)"| RES_SB["Semantic Judgment Accuracy"]
+    MODEL -->|"Classify via SEMANTIC_GUIDE"| RES_SB["Semantic Judgment Accuracy"]
 ```
 
 ### 1. Core Bench (Deterministic Engine)
-* **Goal:** Verify that given fixed Epistemic State A and Epistemic State B, `alittlediff` deterministically produces the exact expected structural changes, lifecycle supersessions, and causal impact traversals.
-* **Requirements:** Local, deterministic, zero LLM calls, zero external daemon requirements.
+* **Scope:** Verifies that given fixed Epistemic State A and Epistemic State B, `alittlediff` deterministically produces the exact expected structural changes, lifecycle supersessions, and causal impact traversals.
+* **Pass Criterion:** Strict equality against `core_expected` fields (`structural_type`, `expected_impacts`, `expected_non_impacts`).
+* **Requirements:** Local, deterministic, 0 LLM calls, zero external daemon dependencies.
 
 ### 2. Capture Bench (Substrate Modeling Quality)
-* **Goal:** Test whether the project knowledge substrate (e.g. MOOSEDev) successfully captures the necessary causal topology from real development events.
-* **Separation of Concerns:** Distinguishes whether an erroneous conclusion was caused by a diff engine bug or by an incomplete/overcompressed knowledge graph representation.
+* **Scope:** Tests whether the knowledge substrate (e.g. MOOSEDev) successfully captures the necessary causal topology from real development events.
+* **Separation of Concerns:** Isolates whether an error was caused by a diff engine bug or by an incomplete/overcompressed knowledge graph representation (`CAPTURE / MODELING ERROR`).
 
 ### 3. Semantic Bench (Semantic Change Classification)
-* **Goal:** Benchmark local models (e.g. `qwen3:8b`, `qwen3:14b`) and heuristics against a manually labeled ground-truth dataset of before/after transition pairs.
-* **Taxonomy:** `refinement`, `world_update`, `belief_revision`, `expansion`, `contraction`, `contradiction`, `semantic_noop`, `unclear`.
+* **Scope:** Benchmarks local models (e.g. `qwen3:8b`, `qwen3:14b`) and heuristics against a manually labeled ground-truth dataset of before/after transition pairs.
+* **Ground Truth:** Defined by [`docs/SEMANTIC_GUIDE.md`](SEMANTIC_GUIDE.md).
+* **Note:** `semantic_type` in current manifests is ground-truth annotation for the future Semantic Bench and is not part of the current Core Bench pass criterion.
 
 ---
 
@@ -44,7 +46,7 @@ Each benchmark scenario is defined by a self-contained JSON manifest:
 
 ```json
 {
-  "id": "workflow_confirmation_refinement",
+  "id": "02_workflow_confirmation_refinement",
   "name": "Automated Workflow Confirmation Precondition",
   "category": "refinement",
   "description": "An automated state transition acquires a mandatory user confirmation precondition.",
@@ -52,9 +54,9 @@ Each benchmark scenario is defined by a self-contained JSON manifest:
   "state_b_nquads": "<urn:rec:req:1> ...",
   "expected_changes": [
     {
-      "change_id_pattern": ".*dec:1.*",
       "structural_type": "superseded",
-      "semantic_type": "refinement"
+      "semantic_type": "refinement",
+      "note": "structural_type is verified by Core Bench; semantic_type is ground truth for Semantic Bench."
     }
   ],
   "expected_impacts": [
@@ -80,18 +82,18 @@ Each benchmark scenario is defined by a self-contained JSON manifest:
 
 ## 3. The 10 Canonical Core Bench Scenarios
 
-| ID | Title | Core Invariant Tested | Expected Output |
+| ID | Title | Semantic Category | Invariant & Oracle Description |
 |---|---|---|---|
-| `01_exact_noop` | Exact State Identity | $A \rightarrow A$ exact identity | 0 changes, 0 impacts |
-| `02_workflow_confirmation_refinement` | Precondition Addition | Structural supersession which is semantically a refinement | 1 supersession; flags downstream decision via `isMotivatedBy` |
-| `03_constraint_refinement` | Invariant Narrowing | Constraint update governing architectural decisions | 1 supersession; flags governed decision via `constrains` |
-| `04_operational_consequence` | Downstream Consequence | Decision change affecting operational costs | 1 change; flags operational consequence via `resultsIn` |
-| `05_empirical_lesson_invalidation` | Empirical Lesson Invalidation | Decision update modifying an empirical rule | 1 change; flags lesson via `learnedFrom` |
-| `06_inverse_relation_equivalence` | Direct / Inverse Equivalence | `constrains` forward vs `isConstrainedBy` reverse | Identical target impact and effect |
-| `07_unrelated_substrate_isolation` | Low-Level Code Churn | Large volume of code entities added to State B | 0 code entities in primary report |
-| `08_negative_decision_isolation` | Negative Traversal Boundary | Modifying a decision governed by a constraint | Decision change does NOT back-propagate to constraint |
-| `09_support_degraded` | Multi-Premise Partial Invalidation | Decision supported by Premise 1 and Premise 2; Premise 1 superseded | Target flagged; retains active Premise 2 (`SUPPORT DEGRADED` archetype) |
-| `10_retired_target_suppression` | Retracted Entity Protection | Upstream premise change pointing to already retired target | Suppressed from active reconsideration alerts |
+| `01_exact_noop` | Exact Semantic No-Op | `semantic_noop` | $A \rightarrow A$ exact identity: 0 changes, 0 impacts. |
+| `02_workflow_confirmation_refinement` | Precondition Addition | `refinement` | Automated state transition acquires user confirmation guard; flags downstream state transition via `isMotivatedBy`. |
+| `03_constraint_refinement` | Invariant Narrowing | `refinement` | Constraint update governing architectural decisions; flags governed decision via `constrains`. |
+| `04_operational_consequence` | Worker Redesign Consequence | `revision` | Decision to replace sync worker with async Redis queue flags latency consequence via `resultsIn`. |
+| `05_empirical_lesson_invalidation` | Empirical Lesson Invalidation | `revision` | Decision update modifying coordinate alignment prompts review of lesson via `learnedFrom`. |
+| `06_inverse_relation_equivalence` | Direct / Inverse Equivalence | `refinement` | Forward `constrains` and inverse `isConstrainedBy` produce identical target impacts and confidence. |
+| `07_unrelated_substrate_isolation` | Substrate Noise Isolation | `semantic_noop` | Adding unrelated `CodeEntity` triples must not alter the primary architectural change set or downstream impact set. |
+| `08_negative_decision_isolation` | Negative Traversal Boundary | `refinement` | Modifying a decision governed by a constraint strictly does not back-propagate to invalidate the constraint. |
+| `09_support_degraded` | Multi-Premise Partial Loss | `refinement` | **Current V0:** flags target via `justification_may_have_changed`.<br/>**Future Target (V1):** `support_degraded` (*1 of 2 explicit supports remains*). |
+| `10_retired_target_suppression` | Retracted Entity Protection | `semantic_noop` | Upstream premise change pointing to already retracted target is suppressed from active alerts. |
 
 ---
 
@@ -108,4 +110,14 @@ When diagnosing discrepancies during benchmarking or live project trials, failur
    4. IMPACT ENGINE ERROR     ──► Policy rule traversed wrong direction or depth
    5. SEMANTIC ERROR          ──► Classifier confused refinement with belief revision
    6. PRESENTATION ERROR      ──► Output noisy or failed to group low-confidence links
+```
+
+---
+
+## 5. Instant Scenario Materialization
+
+Any benchmark scenario can be materialized into a clean, reproducible Git repository in 1 second using the helper script:
+
+```bash
+python benchmarks/materialize.py 02_workflow_confirmation_refinement
 ```
