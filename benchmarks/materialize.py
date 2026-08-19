@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """Benchmark Scenario Materializer.
 
 Materializes any canonical alittlediff-bench manifest into a standalone,
@@ -6,7 +6,7 @@ reproducible Git repository for live interactive inspection and evaluation.
 
 Usage:
     python benchmarks/materialize.py 02_workflow_confirmation_refinement
-    python benchmarks/materialize.py benchmarks/manifests/03_constraint_refinement.json --output-dir ./demo-repo
+    python benchmarks/materialize.py 02_workflow_confirmation_refinement --output-dir ./demo-repo --force
 """
 
 import argparse
@@ -18,7 +18,30 @@ import sys
 import tempfile
 
 
-def materialize_scenario(manifest_input: str, output_dir: Path | None = None) -> Path:
+def _validate_safe_path(target_path: Path):
+    """Refuse dangerous target directories to prevent accidental data loss."""
+    resolved = target_path.resolve()
+    
+    # Disallow root directories
+    if resolved == resolved.parent:
+        raise ValueError(f"Refusing to materialize into filesystem root: {resolved}")
+
+    # Disallow user home directory
+    home = Path.home().resolve()
+    if resolved == home:
+        raise ValueError(f"Refusing to materialize directly into user home directory: {resolved}")
+
+    # Disallow repository root
+    repo_root = Path(__file__).parent.parent.resolve()
+    if resolved == repo_root:
+        raise ValueError(f"Refusing to materialize into the a-little-diff repository root: {resolved}")
+
+
+def materialize_scenario(
+    manifest_input: str,
+    output_dir: Path | None = None,
+    force: bool = False,
+) -> Path:
     """Materialize a benchmark scenario into a git repository."""
     # Resolve manifest path
     manifest_path = Path(manifest_input)
@@ -46,8 +69,15 @@ def materialize_scenario(manifest_input: str, output_dir: Path | None = None) ->
     else:
         target_dir = Path(output_dir)
 
+    _validate_safe_path(target_dir)
+
     if target_dir.exists():
+        if not force and any(target_dir.iterdir()):
+            raise FileExistsError(
+                f"Target directory '{target_dir}' already exists and is not empty. Use --force to overwrite."
+            )
         shutil.rmtree(target_dir)
+
     target_dir.mkdir(parents=True, exist_ok=True)
 
     def run_git(*args: str):
@@ -63,13 +93,13 @@ def materialize_scenario(manifest_input: str, output_dir: Path | None = None) ->
     moose_dir.mkdir(parents=True, exist_ok=True)
     (moose_dir / "kg.nq").write_text(data["state_a_nquads"], encoding="utf-8")
     run_git("add", ".")
-    run_git("commit", "-m", f"State A: {name}")
+    run_git("commit", "--allow-empty", "-m", f"State A: {name}")
     run_git("tag", "state_a")
 
     # State B
     (moose_dir / "kg.nq").write_text(data["state_b_nquads"], encoding="utf-8")
     run_git("add", ".")
-    run_git("commit", "-m", f"State B: {name}")
+    run_git("commit", "--allow-empty", "-m", f"State B: {name}")
     run_git("tag", "state_b")
 
     return target_dir
@@ -79,10 +109,11 @@ def main():
     parser = argparse.ArgumentParser(description="Materialize a benchmark scenario into a live Git repository.")
     parser.add_argument("scenario", help="Scenario ID (e.g. 02_workflow_confirmation_refinement) or manifest path")
     parser.add_argument("--output-dir", "-o", help="Target directory for the materialized repository (defaults to tempdir)")
+    parser.add_argument("--force", "-f", action="store_true", help="Overwrite existing non-empty output directory")
     args = parser.parse_args()
 
     try:
-        out_path = materialize_scenario(args.scenario, Path(args.output_dir) if args.output_dir else None)
+        out_path = materialize_scenario(args.scenario, Path(args.output_dir) if args.output_dir else None, force=args.force)
         print(f"\nSuccessfully materialized scenario '{args.scenario}'!")
         print(f"Location: {out_path.resolve()}\n")
         print("Run epistemic diff with:")

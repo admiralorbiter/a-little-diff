@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "id": "14_multiple_rationales_absorption",
+  "name": "Multiple Rationale Absorption",
+  "category": "refinement",
+  "description": "Multiple rationale metadata records are absorbed into the parent record without duplicate change items.",
+  "state_a_nquads": "<urn:rec:dec:cache> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:cache> <https://moosedev.org/ontology/hasTitle> \"In-memory caching\" .\n<urn:rec:dec:cache> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n\n<urn:rat:1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Rationale> .\n<urn:rat:1> <https://moosedev.org/ontology/hasTitle> \"Latency under 5ms\" .\n<urn:rec:dec:cache> <https://moosedev.org/ontology/justifiedBy> <urn:rat:1> .",
+  "state_b_nquads": "<urn:rec:dec:cache> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:cache> <https://moosedev.org/ontology/hasTitle> \"In-memory caching\" .\n<urn:rec:dec:cache> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n\n<urn:rat:1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Rationale> .\n<urn:rat:1> <https://moosedev.org/ontology/hasTitle> \"Latency under 5ms\" .\n<urn:rat:2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Rationale> .\n<urn:rat:2> <https://moosedev.org/ontology/hasTitle> \"Eliminates database read locks\" .\n\n<urn:rec:dec:cache> <https://moosedev.org/ontology/justifiedBy> <urn:rat:1> .\n<urn:rec:dec:cache> <https://moosedev.org/ontology/justifiedBy> <urn:rat:2> .",
+  "expected_changes": [
+    {
+      "structural_type": "added",
+      "before_id": null,
+      "after_id": "urn:rat:2",
+      "semantic_type": "refinement",
+      "note": null
+    },
+    {
+      "structural_type": "relation_added",
+      "before_id": "urn:rec:dec:cache",
+      "after_id": "urn:rec:dec:cache",
+      "semantic_type": "refinement",
+      "note": null
+    }
+  ],
+  "expected_impacts": [],
+  "expected_non_impacts": [],
+  "metamorphic_invariants": [
+    "line_order_permutation",
+    "whitespace_normalization"
+  ],
+  "future_target": null
+}

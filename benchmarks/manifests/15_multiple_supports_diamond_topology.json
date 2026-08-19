@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "id": "15_multiple_supports_diamond_topology",
+  "name": "Diamond Multi-Support Topology",
+  "category": "refinement",
+  "description": "Two distinct constraints motivate the same decision; modifying one creates exactly one impact item.",
+  "state_a_nquads": "<urn:rec:con:a> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:a> <https://moosedev.org/ontology/hasTitle> \"Constraint A\" .\n<urn:rec:con:a> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n\n<urn:rec:con:b> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:b> <https://moosedev.org/ontology/hasTitle> \"Constraint B\" .\n<urn:rec:con:b> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n\n<urn:rec:dec:d> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:d> <https://moosedev.org/ontology/hasTitle> \"Decision D\" .\n<urn:rec:dec:d> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:d> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:con:a> .\n<urn:rec:dec:d> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:con:b> .",
+  "state_b_nquads": "<urn:rec:con:a> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:a> <https://moosedev.org/ontology/hasTitle> \"Constraint A\" .\n<urn:rec:con:a> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:con:a> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:con:a_v2> .\n\n<urn:rec:con:a_v2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:a_v2> <https://moosedev.org/ontology/hasTitle> \"Constraint A v2\" .\n<urn:rec:con:a_v2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:a_v2> <https://moosedev.org/ontology/supersedes> <urn:rec:con:a> .\n\n<urn:rec:con:b> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:b> <https://moosedev.org/ontology/hasTitle> \"Constraint B\" .\n<urn:rec:con:b> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n\n<urn:rec:dec:d> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:d> <https://moosedev.org/ontology/hasTitle> \"Decision D\" .\n<urn:rec:dec:d> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:d> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:con:a> .\n<urn:rec:dec:d> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:con:b> .",
+  "expected_changes": [
+    {
+      "structural_type": "superseded",
+      "before_id": "urn:rec:con:a",
+      "after_id": "urn:rec:con:a_v2",
+      "semantic_type": "refinement",
+      "note": null
+    }
+  ],
+  "expected_impacts": [
+    {
+      "target_id": "urn:rec:dec:d",
+      "effect": "justification_may_have_changed",
+      "confidence": "high",
+      "predicate": "isMotivatedBy"
+    }
+  ],
+  "expected_non_impacts": [
+    "urn:rec:con:b"
+  ],
+  "metamorphic_invariants": [
+    "line_order_permutation",
+    "whitespace_normalization"
+  ],
+  "future_target": null
+}

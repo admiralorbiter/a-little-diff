@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "id": "19_rejected_target_suppression",
+  "name": "Rejected Target Alert Suppression",
+  "category": "semantic_noop",
+  "description": "Downstream targets with rejected status must not receive active alerts.",
+  "state_a_nquads": "<urn:rec:con:auth> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:auth> <https://moosedev.org/ontology/hasTitle> \"Auth constraint\" .\n<urn:rec:con:auth> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:auth> <https://moosedev.org/ontology/constrains> <urn:rec:dec:rejected> .\n\n<urn:rec:dec:rejected> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:rejected> <https://moosedev.org/ontology/hasTitle> \"Rejected alternative\" .\n<urn:rec:dec:rejected> <https://moosedev.org/ontology/hasLifecycleStatus> \"rejected\" .",
+  "state_b_nquads": "<urn:rec:con:auth> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:auth> <https://moosedev.org/ontology/hasTitle> \"Auth constraint\" .\n<urn:rec:con:auth> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:con:auth> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:con:auth2> .\n\n<urn:rec:con:auth2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:auth2> <https://moosedev.org/ontology/hasTitle> \"Auth constraint v2\" .\n<urn:rec:con:auth2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:auth2> <https://moosedev.org/ontology/supersedes> <urn:rec:con:auth> .\n\n<urn:rec:dec:rejected> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:rejected> <https://moosedev.org/ontology/hasTitle> \"Rejected alternative\" .\n<urn:rec:dec:rejected> <https://moosedev.org/ontology/hasLifecycleStatus> \"rejected\" .",
+  "expected_changes": [
+    {
+      "structural_type": "superseded",
+      "before_id": "urn:rec:con:auth",
+      "after_id": "urn:rec:con:auth2",
+      "semantic_type": null,
+      "note": null
+    }
+  ],
+  "expected_impacts": [],
+  "expected_non_impacts": [
+    "urn:rec:dec:rejected"
+  ],
+  "metamorphic_invariants": [
+    "line_order_permutation",
+    "whitespace_normalization"
+  ],
+  "future_target": null
+}

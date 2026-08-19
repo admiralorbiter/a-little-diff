@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "id": "25_unicode_crlf_bom_literals",
+  "name": "Unicode, CRLF, and UTF-8 BOM Handling",
+  "category": "semantic_noop",
+  "description": "Handles Windows CRLF line endings, UTF-8 BOM, and Unicode characters safely.",
+  "state_a_nquads": "﻿<urn:rec:req:unicode> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Requirement> .\r\n<urn:rec:req:unicode> <https://moosedev.org/ontology/hasTitle> \"Multi-language Support: 日本語 🚀 & élévation\" .\r\n<urn:rec:req:unicode> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\r\n",
+  "state_b_nquads": "﻿<urn:rec:req:unicode> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Requirement> .\r\n<urn:rec:req:unicode> <https://moosedev.org/ontology/hasTitle> \"Multi-language Support: 日本語 🚀 & élévation\" .\r\n<urn:rec:req:unicode> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\r\n",
+  "expected_changes": [],
+  "expected_impacts": [],
+  "expected_non_impacts": [
+    "urn:rec:req:unicode"
+  ],
+  "metamorphic_invariants": [
+    "line_order_permutation",
+    "whitespace_normalization"
+  ],
+  "future_target": null
+}

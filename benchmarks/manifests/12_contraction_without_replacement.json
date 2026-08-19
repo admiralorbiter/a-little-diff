@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "id": "12_contraction_without_replacement",
+  "name": "Knowledge Contraction",
+  "category": "contraction",
+  "description": "A requirement is permanently retracted without any successor record.",
+  "state_a_nquads": "<urn:rec:req:legacy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Requirement> .\n<urn:rec:req:legacy> <https://moosedev.org/ontology/hasTitle> \"Legacy XML export format\" .\n<urn:rec:req:legacy> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n\n<urn:rec:dec:exporter> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:exporter> <https://moosedev.org/ontology/hasTitle> \"SAX-based XML serialization pipeline\" .\n<urn:rec:dec:exporter> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:exporter> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:req:legacy> .",
+  "state_b_nquads": "<urn:rec:req:legacy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Requirement> .\n<urn:rec:req:legacy> <https://moosedev.org/ontology/hasTitle> \"Legacy XML export format\" .\n<urn:rec:req:legacy> <https://moosedev.org/ontology/hasLifecycleStatus> \"retracted\" .\n\n<urn:rec:dec:exporter> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:exporter> <https://moosedev.org/ontology/hasTitle> \"SAX-based XML serialization pipeline\" .\n<urn:rec:dec:exporter> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:exporter> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:req:legacy> .",
+  "expected_changes": [
+    {
+      "structural_type": "status_changed",
+      "before_id": "urn:rec:req:legacy",
+      "after_id": "urn:rec:req:legacy",
+      "semantic_type": "contraction",
+      "note": null
+    }
+  ],
+  "expected_impacts": [
+    {
+      "target_id": "urn:rec:dec:exporter",
+      "effect": "justification_may_have_changed",
+      "confidence": "high",
+      "predicate": "isMotivatedBy"
+    }
+  ],
+  "expected_non_impacts": [],
+  "metamorphic_invariants": [
+    "line_order_permutation",
+    "whitespace_normalization"
+  ],
+  "future_target": null
+}

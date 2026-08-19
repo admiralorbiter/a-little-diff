@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "id": "20_dangling_relation_target",
+  "name": "Dangling Relation Tolerance",
+  "category": "semantic_noop",
+  "description": "Relations pointing to non-existent IRIs are safely ignored without engine failure.",
+  "state_a_nquads": "<urn:rec:dec:orphan> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:orphan> <https://moosedev.org/ontology/hasTitle> \"Decision with phantom link\" .\n<urn:rec:dec:orphan> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:orphan> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:phantom:nonexistent> .",
+  "state_b_nquads": "<urn:rec:dec:orphan> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:orphan> <https://moosedev.org/ontology/hasTitle> \"Decision with phantom link\" .\n<urn:rec:dec:orphan> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:orphan> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:phantom:nonexistent> .",
+  "expected_changes": [],
+  "expected_impacts": [],
+  "expected_non_impacts": [
+    "urn:rec:dec:orphan"
+  ],
+  "metamorphic_invariants": [
+    "line_order_permutation",
+    "whitespace_normalization"
+  ],
+  "future_target": null
+}

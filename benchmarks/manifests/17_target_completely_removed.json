@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "id": "17_target_completely_removed",
+  "name": "Completely Removed Target Suppression",
+  "category": "semantic_noop",
+  "description": "An upstream premise changes, but the downstream record was deleted entirely in State B.",
+  "state_a_nquads": "<urn:rec:con:old> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:old> <https://moosedev.org/ontology/hasTitle> \"Constraint Old\" .\n<urn:rec:con:old> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n\n<urn:rec:dec:deleted> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:deleted> <https://moosedev.org/ontology/hasTitle> \"Deleted decision\" .\n<urn:rec:dec:deleted> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:deleted> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:con:old> .",
+  "state_b_nquads": "<urn:rec:con:old> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:old> <https://moosedev.org/ontology/hasTitle> \"Constraint Old\" .\n<urn:rec:con:old> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:con:old> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:con:new> .\n\n<urn:rec:con:new> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:new> <https://moosedev.org/ontology/hasTitle> \"Constraint New\" .\n<urn:rec:con:new> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:new> <https://moosedev.org/ontology/supersedes> <urn:rec:con:old> .",
+  "expected_changes": [
+    {
+      "structural_type": "superseded",
+      "before_id": "urn:rec:con:old",
+      "after_id": "urn:rec:con:new",
+      "semantic_type": null,
+      "note": null
+    },
+    {
+      "structural_type": "removed",
+      "before_id": "urn:rec:dec:deleted",
+      "after_id": null,
+      "semantic_type": null,
+      "note": null
+    }
+  ],
+  "expected_impacts": [
+    {
+      "target_id": "urn:rec:dec:deleted",
+      "effect": "justification_may_have_changed",
+      "confidence": "high",
+      "predicate": "isMotivatedBy"
+    }
+  ],
+  "expected_non_impacts": [],
+  "metamorphic_invariants": [
+    "line_order_permutation",
+    "whitespace_normalization"
+  ],
+  "future_target": null
+}

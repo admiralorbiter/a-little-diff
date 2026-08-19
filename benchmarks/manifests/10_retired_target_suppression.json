@@ -1,4 +1,5 @@
 {
+  "schema_version": "1.0",
   "id": "10_retired_target_suppression",
   "name": "Retired Target Alert Suppression",
   "category": "semantic_noop",
@@ -8,7 +9,10 @@
   "expected_changes": [
     {
       "structural_type": "superseded",
-      "semantic_type": "semantic_noop"
+      "before_id": "urn:rec:con:auth",
+      "after_id": "urn:rec:con:auth_v2",
+      "semantic_type": "semantic_noop",
+      "note": null
     }
   ],
   "expected_impacts": [],
@@ -16,6 +20,9 @@
     "urn:rec:dec:session"
   ],
   "metamorphic_invariants": [
-    "line_order_permutation"
-  ]
+    "line_order_permutation",
+    "whitespace_normalization",
+    "crlf_vs_lf"
+  ],
+  "future_target": null
 }

@@ -46,12 +46,22 @@ def diff_states(
     # Step 1: Detect explicit supersessions (lifecycle collapsing)
     # Check head records for outgoing 'supersedes' or 'replaces' relations pointing to base records
     for head_id, head_rec in head_state.records.items():
+        base_head_rec = base_state.get_record(head_id)
         for rel in head_rec.relations:
             pred_lower = rel.predicate.lower()
             if pred_lower in ("supersedes", "replaces"):
                 target_base_id = rel.object_id
                 base_rec = base_state.get_record(target_base_id)
                 if base_rec is not None:
+                    # Check if this exact supersession already existed in base_state
+                    if base_head_rec is not None:
+                        already_in_base = any(
+                            r.predicate.lower() in ("supersedes", "replaces") and r.object_id == target_base_id
+                            for r in base_head_rec.relations
+                        )
+                        if already_in_base and base_rec.status == "superseded":
+                            continue
+
                     # Valid supersession detected
                     handled_head_ids.add(head_id)
                     handled_base_ids.add(target_base_id)
@@ -109,6 +119,14 @@ def diff_states(
                     superseding_id = rel.object_id
                     superseding_rec = head_state.get_record(superseding_id)
                     if superseding_rec is not None:
+                        # Check if base_rec was already superseded by superseding_id in base_state
+                        already_in_base = any(
+                            r.predicate.lower() == "issupersededby" and r.object_id == superseding_id
+                            for r in base_rec.relations
+                        )
+                        if already_in_base and base_rec.status == "superseded":
+                            continue
+
                         handled_base_ids.add(base_id)
                         handled_head_ids.add(superseding_id)
                         changes.append(

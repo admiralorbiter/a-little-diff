@@ -1,4 +1,5 @@
 {
+  "schema_version": "1.0",
   "id": "06_inverse_relation_equivalence",
   "name": "Direct vs Inverse Predicate Equivalence",
   "category": "refinement",
@@ -8,7 +9,10 @@
   "expected_changes": [
     {
       "structural_type": "superseded",
-      "semantic_type": "refinement"
+      "before_id": "urn:rec:con:strict",
+      "after_id": "urn:rec:con:strict_v2",
+      "semantic_type": "refinement",
+      "note": null
     }
   ],
   "expected_impacts": [
@@ -21,6 +25,9 @@
   ],
   "expected_non_impacts": [],
   "metamorphic_invariants": [
-    "line_order_permutation"
-  ]
+    "line_order_permutation",
+    "whitespace_normalization",
+    "crlf_vs_lf"
+  ],
+  "future_target": null
 }

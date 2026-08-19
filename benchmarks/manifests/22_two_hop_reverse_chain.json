@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "id": "22_two_hop_reverse_chain",
+  "name": "Two-Hop Reverse Causal Propagation",
+  "category": "refinement",
+  "description": "A changed premise propagates 2 hops downstream when max_depth=2.",
+  "state_a_nquads": "<urn:rec:con:root> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:root> <https://moosedev.org/ontology/hasTitle> \"Root Constraint\" .\n<urn:rec:con:root> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n\n<urn:rec:dec:hop1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:hop1> <https://moosedev.org/ontology/hasTitle> \"Intermediate Decision\" .\n<urn:rec:dec:hop1> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:hop1> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:con:root> .\n\n<urn:rec:dec:hop2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:hop2> <https://moosedev.org/ontology/hasTitle> \"Leaf Plan\" .\n<urn:rec:dec:hop2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:hop2> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:dec:hop1> .",
+  "state_b_nquads": "<urn:rec:con:root> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:root> <https://moosedev.org/ontology/hasTitle> \"Root Constraint\" .\n<urn:rec:con:root> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:con:root> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:con:root_v2> .\n\n<urn:rec:con:root_v2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:root_v2> <https://moosedev.org/ontology/hasTitle> \"Root Constraint v2\" .\n<urn:rec:con:root_v2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:root_v2> <https://moosedev.org/ontology/supersedes> <urn:rec:con:root> .\n\n<urn:rec:dec:hop1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:hop1> <https://moosedev.org/ontology/hasTitle> \"Intermediate Decision\" .\n<urn:rec:dec:hop1> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:hop1> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:con:root> .\n\n<urn:rec:dec:hop2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:hop2> <https://moosedev.org/ontology/hasTitle> \"Leaf Plan\" .\n<urn:rec:dec:hop2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:hop2> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:dec:hop1> .",
+  "expected_changes": [
+    {
+      "structural_type": "superseded",
+      "before_id": "urn:rec:con:root",
+      "after_id": "urn:rec:con:root_v2",
+      "semantic_type": "refinement",
+      "note": null
+    }
+  ],
+  "expected_impacts": [
+    {
+      "target_id": "urn:rec:dec:hop1",
+      "effect": "justification_may_have_changed",
+      "confidence": "high",
+      "predicate": "isMotivatedBy"
+    },
+    {
+      "target_id": "urn:rec:dec:hop2",
+      "effect": "justification_may_have_changed",
+      "confidence": "high",
+      "predicate": "isMotivatedBy"
+    }
+  ],
+  "expected_non_impacts": [],
+  "metamorphic_invariants": [
+    "line_order_permutation",
+    "whitespace_normalization"
+  ],
+  "future_target": null
+}

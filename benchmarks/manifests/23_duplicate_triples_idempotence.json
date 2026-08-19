@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "id": "23_duplicate_triples_idempotence",
+  "name": "Duplicate Triples Parsing Idempotence",
+  "category": "semantic_noop",
+  "description": "Repeated identical quads in input state parse into a clean normalized record without duplicating metadata.",
+  "state_a_nquads": "<urn:rec:req:dup> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Requirement> .\n<urn:rec:req:dup> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Requirement> .\n<urn:rec:req:dup> <https://moosedev.org/ontology/hasTitle> \"Data retention\" .\n<urn:rec:req:dup> <https://moosedev.org/ontology/hasTitle> \"Data retention\" .\n<urn:rec:req:dup> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:req:dup> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .",
+  "state_b_nquads": "<urn:rec:req:dup> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Requirement> .\n<urn:rec:req:dup> <https://moosedev.org/ontology/hasTitle> \"Data retention\" .\n<urn:rec:req:dup> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .",
+  "expected_changes": [],
+  "expected_impacts": [],
+  "expected_non_impacts": [
+    "urn:rec:req:dup"
+  ],
+  "metamorphic_invariants": [
+    "line_order_permutation",
+    "whitespace_normalization"
+  ],
+  "future_target": null
+}

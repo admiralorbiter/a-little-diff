@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "id": "11_chained_supersession_a_b_c",
+  "name": "Multi-Hop Chained Supersession",
+  "category": "refinement",
+  "description": "Record A superseded by B in prior state; B superseded by C in current transition.",
+  "state_a_nquads": "<urn:rec:dec:v1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:v1> <https://moosedev.org/ontology/hasTitle> \"Session v1\" .\n<urn:rec:dec:v1> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:dec:v1> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:dec:v2> .\n\n<urn:rec:dec:v2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:v2> <https://moosedev.org/ontology/hasTitle> \"Session v2\" .\n<urn:rec:dec:v2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:v2> <https://moosedev.org/ontology/supersedes> <urn:rec:dec:v1> .",
+  "state_b_nquads": "<urn:rec:dec:v1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:v1> <https://moosedev.org/ontology/hasTitle> \"Session v1\" .\n<urn:rec:dec:v1> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:dec:v1> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:dec:v2> .\n\n<urn:rec:dec:v2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:v2> <https://moosedev.org/ontology/hasTitle> \"Session v2\" .\n<urn:rec:dec:v2> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:dec:v2> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:dec:v3> .\n\n<urn:rec:dec:v3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:v3> <https://moosedev.org/ontology/hasTitle> \"Session v3\" .\n<urn:rec:dec:v3> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:v3> <https://moosedev.org/ontology/supersedes> <urn:rec:dec:v2> .",
+  "expected_changes": [
+    {
+      "structural_type": "superseded",
+      "before_id": "urn:rec:dec:v2",
+      "after_id": "urn:rec:dec:v3",
+      "semantic_type": "refinement",
+      "note": null
+    }
+  ],
+  "expected_impacts": [],
+  "expected_non_impacts": [],
+  "metamorphic_invariants": [
+    "line_order_permutation",
+    "whitespace_normalization"
+  ],
+  "future_target": null
+}

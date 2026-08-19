@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "id": "21_self_supersession_cycle_guard",
+  "name": "Self-Supersession Cycle Guard",
+  "category": "semantic_noop",
+  "description": "A malformed record claiming to supersede itself is safely handled without infinite recursion.",
+  "state_a_nquads": "<urn:rec:dec:self> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:self> <https://moosedev.org/ontology/hasTitle> \"Self referential decision\" .\n<urn:rec:dec:self> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .",
+  "state_b_nquads": "<urn:rec:dec:self> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:self> <https://moosedev.org/ontology/hasTitle> \"Self referential decision\" .\n<urn:rec:dec:self> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:dec:self> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:dec:self> .\n<urn:rec:dec:self> <https://moosedev.org/ontology/supersedes> <urn:rec:dec:self> .",
+  "expected_changes": [
+    {
+      "structural_type": "superseded",
+      "before_id": "urn:rec:dec:self",
+      "after_id": "urn:rec:dec:self",
+      "semantic_type": null,
+      "note": null
+    }
+  ],
+  "expected_impacts": [],
+  "expected_non_impacts": [],
+  "metamorphic_invariants": [
+    "line_order_permutation",
+    "whitespace_normalization"
+  ],
+  "future_target": null
+}
