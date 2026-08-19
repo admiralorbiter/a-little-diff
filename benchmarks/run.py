@@ -13,6 +13,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import time
@@ -68,7 +69,7 @@ SUITE_DEFINITIONS = {
 
 
 def run_suite(files: list[str]) -> dict:
-    """Run pytest on a list of test files and return result metrics."""
+    """Run pytest on a list of test files and return detailed result metrics."""
     cmd = [sys.executable, "-m", "pytest", "-q", "--tb=short"] + files
     start_time = time.perf_counter()
     proc = subprocess.run(cmd, capture_output=True, text=True)
@@ -77,21 +78,53 @@ def run_suite(files: list[str]) -> dict:
     output = proc.stdout + proc.stderr
     passed = proc.returncode == 0
 
-    # Parse passed/failed count from pytest output
-    count = 0
+    # Parse counts with regex from pytest summary line
+    passed_count = 0
+    failed_count = 0
+    skipped_count = 0
+    error_count = 0
+
     for line in output.splitlines():
-        if "passed" in line:
-            import re
-            m = re.search(r"(\d+)\s+passed", line)
-            if m:
-                count = int(m.group(1))
+        # Match lines like "57 passed, 2 failed, 1 skipped in 1.23s"
+        m_pass = re.search(r"(\d+)\s+passed", line)
+        if m_pass:
+            passed_count = int(m_pass.group(1))
+
+        m_fail = re.search(r"(\d+)\s+failed", line)
+        if m_fail:
+            failed_count = int(m_fail.group(1))
+
+        m_skip = re.search(r"(\d+)\s+skipped", line)
+        if m_skip:
+            skipped_count = int(m_skip.group(1))
+
+        m_err = re.search(r"(\d+)\s+error", line)
+        if m_err:
+            error_count = int(m_err.group(1))
+
+    total_executed = passed_count + failed_count + error_count
+
+    # Extract failure lines if any
+    failures_summary = []
+    if not passed:
+        capture = False
+        for line in output.splitlines():
+            if "FAILURES" in line or "ERRORS" in line:
+                capture = True
+            if capture:
+                failures_summary.append(line)
 
     return {
         "passed": passed,
-        "test_count": count,
+        "passed_count": passed_count,
+        "failed_count": failed_count,
+        "skipped_count": skipped_count,
+        "error_count": error_count,
+        "total_executed": total_executed,
         "duration_seconds": round(duration, 2),
         "return_code": proc.returncode,
-        "raw_output": output,
+        "raw_output": output if not passed else "",
+        "failures_summary": "\n".join(failures_summary[:30]) if failures_summary else "",
     }
 
 
@@ -110,7 +143,9 @@ def main():
         "summary": {
             "total_suites": 0,
             "passed_suites": 0,
-            "total_tests": 0,
+            "failed_suites": 0,
+            "total_tests_passed": 0,
+            "total_tests_failed": 0,
             "total_duration_seconds": 0.0,
             "status": "PASS",
         }
@@ -119,7 +154,8 @@ def main():
     table = Table(title="Verification Suite Results", expand=True)
     table.add_column("Layer / Suite Name", style="cyan")
     table.add_column("Profile", justify="center")
-    table.add_column("Tests", justify="right")
+    table.add_column("Passed", justify="right")
+    table.add_column("Failed", justify="right")
     table.add_column("Duration", justify="right")
     table.add_column("Status", justify="center")
 
@@ -128,19 +164,25 @@ def main():
 
     for suite_key, suite_info in SUITE_DEFINITIONS.items():
         if args.profile == "fast" and suite_info["profile"] == "full":
-            table.add_row(suite_info["name"], "full", "[dim]skipped[/dim]", "-", "[dim]SKIPPED[/dim]")
+            table.add_row(suite_info["name"], "full", "-", "-", "-", "[dim]SKIPPED[/dim]")
             continue
 
         res = run_suite(suite_info["files"])
         total_duration += res["duration_seconds"]
         results_data["summary"]["total_suites"] += 1
-        results_data["summary"]["total_tests"] += res["test_count"]
+        results_data["summary"]["total_tests_passed"] += res["passed_count"]
+        results_data["summary"]["total_tests_failed"] += res["failed_count"] + res["error_count"]
+
         results_data["suites"][suite_key] = {
             "name": suite_info["name"],
             "profile": suite_info["profile"],
-            "test_count": res["test_count"],
+            "passed_count": res["passed_count"],
+            "failed_count": res["failed_count"],
+            "skipped_count": res["skipped_count"],
+            "error_count": res["error_count"],
             "duration_seconds": res["duration_seconds"],
             "passed": res["passed"],
+            "failures_summary": res["failures_summary"],
         }
 
         if res["passed"]:
@@ -148,12 +190,14 @@ def main():
             status_text = "[bold green]PASS[/bold green]"
         else:
             all_passed = False
+            results_data["summary"]["failed_suites"] += 1
             status_text = "[bold red]FAIL[/bold red]"
 
         table.add_row(
             suite_info["name"],
             suite_info["profile"],
-            str(res["test_count"]),
+            str(res["passed_count"]),
+            str(res["failed_count"] + res["error_count"]),
             f"{res['duration_seconds']}s",
             status_text,
         )
@@ -163,8 +207,16 @@ def main():
 
     console.print(table)
 
+    if not all_passed:
+        console.print("\n[bold red]Suite Failure Diagnostics:[/bold red]")
+        for s_key, s_data in results_data["suites"].items():
+            if not s_data["passed"] and s_data["failures_summary"]:
+                console.print(Panel(f"[bold]{s_data['name']}[/bold]\n\n{s_data['failures_summary']}", border_style="red"))
+
     summary_panel = (
-        f"[bold]Total Tests Run:[/bold] {results_data['summary']['total_tests']} tests across {results_data['summary']['passed_suites']}/{results_data['summary']['total_suites']} suites\n"
+        f"[bold]Total Tests Passed:[/bold] {results_data['summary']['total_tests_passed']}\n"
+        f"[bold]Total Tests Failed:[/bold] {results_data['summary']['total_tests_failed']}\n"
+        f"[bold]Suites Passing:[/bold] {results_data['summary']['passed_suites']}/{results_data['summary']['total_suites']}\n"
         f"[bold]Total Duration:[/bold] {results_data['summary']['total_duration_seconds']} seconds\n"
         f"[bold]Overall Status:[/bold] {'[bold green]VERIFIED READY[/bold green]' if all_passed else '[bold red]REVIEW REQUIRED[/bold red]'}"
     )
@@ -182,13 +234,13 @@ def main():
         f"# A Little Diff Verification Report",
         f"**Profile:** `{args.profile}`  ",
         f"**Timestamp:** `{results_data['timestamp']}`  ",
-        f"**Overall Status:** **{results_data['summary']['status']}** ({results_data['summary']['total_tests']} tests passed in {results_data['summary']['total_duration_seconds']}s)  \n",
-        "| Suite Name | Profile | Tests | Duration | Status |",
-        "|---|---|---|---|---|",
+        f"**Overall Status:** **{results_data['summary']['status']}** ({results_data['summary']['total_tests_passed']} passed, {results_data['summary']['total_tests_failed']} failed in {results_data['summary']['total_duration_seconds']}s)  \n",
+        "| Layer / Suite Name | Profile | Passed | Failed | Duration | Status |",
+        "|---|---|---|---|---|---|",
     ]
     for s_key, s_data in results_data["suites"].items():
-        st = "✅ PASS" if s_data["passed"] else "❌ FAIL"
-        md_lines.append(f"| {s_data['name']} | `{s_data['profile']}` | {s_data['test_count']} | {s_data['duration_seconds']}s | {st} |")
+        st_icon = "✅ PASS" if s_data["passed"] else "❌ FAIL"
+        md_lines.append(f"| {s_data['name']} | `{s_data['profile']}` | {s_data['passed_count']} | {s_data['failed_count']} | {s_data['duration_seconds']}s | {st_icon} |")
 
     md_path = results_dir / "latest.md"
     with open(md_path, "w", encoding="utf-8") as f:

@@ -1,4 +1,5 @@
-﻿import json
+﻿from collections import Counter
+import json
 from pathlib import Path
 import pytest
 
@@ -13,7 +14,7 @@ MANIFEST_FILES = sorted(MANIFESTS_DIR.glob("*.json"))
 
 @pytest.mark.parametrize("manifest_path", MANIFEST_FILES, ids=lambda p: p.stem)
 def test_benchmark_manifest_oracle(manifest_path: Path):
-    """Execute Core Bench oracle tests against strict BenchmarkManifest schema."""
+    """Execute Core Bench oracle tests using exact multiset Counter matching."""
     with open(manifest_path, "r", encoding="utf-8") as f:
         manifest = BenchmarkManifest.model_validate_json(f.read())
 
@@ -22,65 +23,47 @@ def test_benchmark_manifest_oracle(manifest_path: Path):
     state_b = adapter.parse_nquads(manifest.state_b_nquads, revision="rev_b")
 
     changes = diff_states(state_a, state_b)
-    # If scenario requires 2-hop propagation, allow max_depth=2
     max_depth = 2 if "two_hop" in manifest.id else 1
     impacts = find_impacts(changes, state_a, state_b, max_depth=max_depth)
 
-    # 1. Validate Change Count
-    assert len(changes) == len(manifest.expected_changes), (
-        f"Manifest {manifest.id}: expected {len(manifest.expected_changes)} changes, got {len(changes)}"
+    # 1. Exact Multiset Change Comparison
+    actual_change_sigs = Counter(
+        (c.structural_type, c.before.id if c.before else None, c.after.id if c.after else None)
+        for c in changes
+    )
+    expected_change_sigs = Counter(
+        (exp.structural_type, exp.before_id, exp.after_id)
+        for exp in manifest.expected_changes
+    )
+    assert actual_change_sigs == expected_change_sigs, (
+        f"Manifest {manifest.id}: structural change signature mismatch:\n"
+        f"  Actual:   {dict(actual_change_sigs)}\n"
+        f"  Expected: {dict(expected_change_sigs)}"
     )
 
-    # 2. Validate Change Signatures (order-independent set/matching)
-    # Signature: (structural_type, before_id or None, after_id or None)
-    actual_change_sigs = []
-    for c in changes:
-        b_id = c.before.id if c.before else None
-        a_id = c.after.id if c.after else None
-        actual_change_sigs.append((c.structural_type, b_id, a_id))
-
-    for exp_chg in manifest.expected_changes:
-        # If before_id or after_id are specified, match them; otherwise match structural_type
-        matched = False
-        for actual_sig in actual_change_sigs:
-            stype_match = actual_sig[0] == exp_chg.structural_type
-            before_match = (exp_chg.before_id is None) or (actual_sig[1] == exp_chg.before_id)
-            after_match = (exp_chg.after_id is None) or (actual_sig[2] == exp_chg.after_id)
-            if stype_match and before_match and after_match:
-                matched = True
-                break
-        assert matched, (
-            f"Manifest {manifest.id}: expected change ({exp_chg.structural_type}, {exp_chg.before_id}, {exp_chg.after_id}) "
-            f"not found in actual changes: {actual_change_sigs}"
+    # 2. Exact Multiset Impact Comparison
+    actual_impact_sigs = Counter(
+        (
+            imp.target_record_id,
+            imp.effect,
+            imp.confidence,
+            imp.path[0].predicate if imp.path else ""
         )
-
-    # 3. Validate Impact Count & Signatures (Core Bench pass criteria)
-    assert len(impacts) == len(manifest.expected_impacts), (
-        f"Manifest {manifest.id}: expected {len(manifest.expected_impacts)} impacts, got {len(impacts)}"
+        for imp in impacts
+    )
+    expected_impact_sigs = Counter(
+        (exp.target_id, exp.effect, exp.confidence, exp.predicate)
+        for exp in manifest.expected_impacts
+    )
+    assert actual_impact_sigs == expected_impact_sigs, (
+        f"Manifest {manifest.id}: causal impact signature mismatch:\n"
+        f"  Actual:   {dict(actual_impact_sigs)}\n"
+        f"  Expected: {dict(expected_impact_sigs)}"
     )
 
-    for exp_imp in manifest.expected_impacts:
-        matched = False
-        for actual_imp in impacts:
-            target_match = actual_imp.target_record_id == exp_imp.target_id
-            effect_match = actual_imp.effect == exp_imp.effect
-            confidence_match = actual_imp.confidence == exp_imp.confidence
-            pred_match = (
-                actual_imp.path
-                and any(r.predicate == exp_imp.predicate for r in actual_imp.path)
-            )
-            if target_match and effect_match and confidence_match and pred_match:
-                matched = True
-                break
-        assert matched, (
-            f"Manifest {manifest.id}: expected impact for target '{exp_imp.target_id}' "
-            f"with effect '{exp_imp.effect}', predicate '{exp_imp.predicate}', confidence '{exp_imp.confidence}' "
-            f"not matched in actual impacts: {[(i.target_record_id, i.effect, i.confidence) for i in impacts]}"
-        )
-
-    # 4. Validate Non-Impacts
-    impacted_targets = {imp.target_record_id for imp in impacts}
+    # 3. Non-Impact Verification
+    impacted_target_ids = {imp.target_record_id for imp in impacts}
     for non_impact_id in manifest.expected_non_impacts:
-        assert non_impact_id not in impacted_targets, (
+        assert non_impact_id not in impacted_target_ids, (
             f"Manifest {manifest.id}: non-impact {non_impact_id} was unexpectedly flagged"
         )

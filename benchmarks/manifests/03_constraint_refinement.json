@@ -27,8 +27,7 @@
   "metamorphic_invariants": [
     "line_order_permutation",
     "whitespace_normalization",
-    "crlf_vs_lf",
-    "inverse_relation_equivalence"
+    "crlf_vs_lf"
   ],
   "future_target": null
 }

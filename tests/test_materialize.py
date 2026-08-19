@@ -3,7 +3,7 @@ import pytest
 from typer.testing import CliRunner
 
 from alittlediff.cli import app
-from benchmarks.materialize import materialize_scenario
+from benchmarks.materialize import SENTINEL_FILENAME, materialize_scenario
 
 runner = CliRunner()
 
@@ -22,15 +22,24 @@ def test_materialize_refuses_existing_dir_without_force(tmp_path: Path):
         materialize_scenario("01_exact_noop", output_dir=target, force=False)
 
 
-def test_materialize_overwrites_with_force(tmp_path: Path):
-    target = tmp_path / "existing_dir"
+def test_materialize_refuses_foreign_dir_even_with_force(tmp_path: Path):
+    target = tmp_path / "foreign_dir"
     target.mkdir()
-    (target / "dummy.txt").write_text("hello")
+    (target / "important_unrelated_file.txt").write_text("critical data")
+
+    with pytest.raises(ValueError, match="does not contain '.alittlediff_materialized'"):
+        materialize_scenario("01_exact_noop", output_dir=target, force=True)
+
+
+def test_materialize_overwrites_with_force_when_sentinel_present(tmp_path: Path):
+    target = tmp_path / "materialized_dir"
+    target.mkdir()
+    (target / SENTINEL_FILENAME).write_text("previous scenario")
 
     out_path = materialize_scenario("01_exact_noop", output_dir=target, force=True)
     assert out_path == target
-    assert not (target / "dummy.txt").exists()
     assert (target / ".moosedev" / "kg.nq").exists()
+    assert (target / SENTINEL_FILENAME).exists()
 
 
 def test_materialize_and_diff_cli(tmp_path: Path):

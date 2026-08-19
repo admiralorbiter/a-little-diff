@@ -1,55 +1,81 @@
 {
-  "timestamp": "2026-08-19T01:11:50.338686+00:00",
+  "timestamp": "2026-08-19T02:13:49.789521+00:00",
   "profile": "full",
   "suites": {
     "unit_and_contract": {
       "name": "Core Unit & MOOSEDev Contract Suite",
       "profile": "fast",
-      "test_count": 57,
-      "duration_seconds": 19.01,
-      "passed": true
+      "passed_count": 57,
+      "failed_count": 0,
+      "skipped_count": 0,
+      "error_count": 0,
+      "duration_seconds": 23.49,
+      "passed": true,
+      "failures_summary": ""
     },
     "canonical_manifests": {
       "name": "Canonical Benchmark Manifests (Core Bench Oracles)",
       "profile": "fast",
-      "test_count": 25,
-      "duration_seconds": 3.75,
-      "passed": true
+      "passed_count": 25,
+      "failed_count": 0,
+      "skipped_count": 0,
+      "error_count": 0,
+      "duration_seconds": 4.57,
+      "passed": true,
+      "failures_summary": ""
     },
     "metamorphic_invariants": {
       "name": "Manifest-Driven Metamorphic Invariants",
       "profile": "fast",
-      "test_count": 66,
-      "duration_seconds": 3.76,
-      "passed": true
+      "passed_count": 66,
+      "failed_count": 0,
+      "skipped_count": 0,
+      "error_count": 0,
+      "duration_seconds": 5.03,
+      "passed": true,
+      "failures_summary": ""
     },
     "materializer_cli": {
       "name": "Materializer & CLI Integration",
       "profile": "fast",
-      "test_count": 4,
-      "duration_seconds": 6.07,
-      "passed": true
+      "passed_count": 5,
+      "failed_count": 0,
+      "skipped_count": 0,
+      "error_count": 0,
+      "duration_seconds": 6.61,
+      "passed": true,
+      "failures_summary": ""
     },
     "hypothesis_properties": {
       "name": "Hypothesis Property & Differential Evaluator Suite",
       "profile": "full",
-      "test_count": 3,
-      "duration_seconds": 4.92,
-      "passed": true
+      "passed_count": 3,
+      "failed_count": 0,
+      "skipped_count": 0,
+      "error_count": 0,
+      "duration_seconds": 5.61,
+      "passed": true,
+      "failures_summary": ""
     },
     "stateful_histories": {
       "name": "Stateful Epistemic Lifecycle History Simulation",
       "profile": "full",
-      "test_count": 1,
-      "duration_seconds": 4.65,
-      "passed": true
+      "passed_count": 1,
+      "failed_count": 0,
+      "skipped_count": 0,
+      "error_count": 0,
+      "duration_seconds": 6.94,
+      "passed": true,
+      "failures_summary": ""
     }
   },
   "summary": {
     "total_suites": 6,
     "passed_suites": 6,
-    "total_tests": 156,
-    "total_duration_seconds": 42.16,
+    "failed_suites": 0,
+    "total_tests_passed": 157,
+    "total_tests_failed": 0,
+    "total_duration_seconds": 52.25,
     "status": "PASS"
   }
 }

@@ -1,80 +1,86 @@
-#!/usr/bin/env python3
-"""Benchmark Scenario Materializer.
+﻿#!/usr/bin/env python3
+"""Materialize a benchmark scenario into a live Git repository on disk.
 
-Materializes any canonical alittlediff-bench manifest into a standalone,
-reproducible Git repository for live interactive inspection and evaluation.
+Translates an alittlediff-bench JSON manifest into a concrete Git repository
+with two commits tagged 'state_a' and 'state_b', allowing manual inspection,
+CLI testing, and prospective development trials.
 
 Usage:
-    python benchmarks/materialize.py 02_workflow_confirmation_refinement
-    python benchmarks/materialize.py 02_workflow_confirmation_refinement --output-dir ./demo-repo --force
+    python -m benchmarks.materialize 02_workflow_confirmation_refinement
+    python -m benchmarks.materialize benchmarks/manifests/02_workflow_confirmation_refinement.json --output-dir /tmp/my-repo
 """
 
 import argparse
-import json
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 import tempfile
 
+from benchmarks.schema import BenchmarkManifest
 
-def _validate_safe_path(target_path: Path):
-    """Refuse dangerous target directories to prevent accidental data loss."""
+SENTINEL_FILENAME = ".alittlediff_materialized"
+
+
+def _validate_safe_path(target_path: Path) -> None:
+    """Ensure we never write or delete dangerous system paths."""
     resolved = target_path.resolve()
-    
-    # Disallow root directories
+    # Refuse root or drive root
     if resolved == resolved.parent:
         raise ValueError(f"Refusing to materialize into filesystem root: {resolved}")
-
-    # Disallow user home directory
-    home = Path.home().resolve()
-    if resolved == home:
-        raise ValueError(f"Refusing to materialize directly into user home directory: {resolved}")
-
-    # Disallow repository root
-    repo_root = Path(__file__).parent.parent.resolve()
+    # Refuse user home directory
+    if resolved == Path.home().resolve():
+        raise ValueError(f"Refusing to materialize directly into home directory: {resolved}")
+    # Refuse repo root (directory containing pyproject.toml)
+    repo_root = Path(__file__).resolve().parent.parent
     if resolved == repo_root:
-        raise ValueError(f"Refusing to materialize into the a-little-diff repository root: {resolved}")
+        raise ValueError(f"Refusing to materialize into A Little Diff repository root: {resolved}")
+
+
+def _is_safe_to_overwrite(target_path: Path) -> bool:
+    """Check if an existing directory is safe to overwrite under --force."""
+    if not target_path.exists():
+        return True
+    if not any(target_path.iterdir()):
+        return True
+    # Safe if marked with our sentinel or contains .moosedev directory
+    if (target_path / SENTINEL_FILENAME).exists() or (target_path / ".moosedev").exists():
+        return True
+    return False
 
 
 def materialize_scenario(
-    manifest_input: str,
-    output_dir: Path | None = None,
+    scenario_id_or_path: str,
+    output_dir: Path | str | None = None,
     force: bool = False,
 ) -> Path:
-    """Materialize a benchmark scenario into a git repository."""
-    # Resolve manifest path
-    manifest_path = Path(manifest_input)
-    if not manifest_path.is_file():
-        # Check in standard manifests directory
-        candidate = Path(__file__).parent / "manifests" / f"{manifest_input}.json"
-        if candidate.is_file():
-            manifest_path = candidate
-        else:
-            # Check with .json suffix
-            candidate = Path(__file__).parent / "manifests" / manifest_input
-            if candidate.is_file():
-                manifest_path = candidate
-            else:
-                raise FileNotFoundError(f"Cannot find manifest for '{manifest_input}'")
+    """Materialize a benchmark scenario manifest into a Git repository."""
+    p = Path(scenario_id_or_path)
+    if not p.exists():
+        # Try finding in benchmarks/manifests/
+        manifests_dir = Path(__file__).parent / "manifests"
+        p = manifests_dir / f"{scenario_id_or_path}.json"
+        if not p.exists():
+            raise FileNotFoundError(f"Benchmark scenario not found: {scenario_id_or_path}")
 
-    with open(manifest_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    scenario_id = data.get("id", manifest_path.stem)
-    name = data.get("name", scenario_id)
+    with open(p, "r", encoding="utf-8") as f:
+        manifest = BenchmarkManifest.model_validate_json(f.read())
 
     if output_dir is None:
-        target_dir = Path(tempfile.gettempdir()) / "alittlediff-bench" / scenario_id
+        temp_parent = Path(tempfile.gettempdir()) / "alittlediff_materialized"
+        temp_parent.mkdir(parents=True, exist_ok=True)
+        target_dir = temp_parent / manifest.id
     else:
         target_dir = Path(output_dir)
 
     _validate_safe_path(target_dir)
 
-    if target_dir.exists():
-        if not force and any(target_dir.iterdir()):
-            raise FileExistsError(
-                f"Target directory '{target_dir}' already exists and is not empty. Use --force to overwrite."
+    if target_dir.exists() and any(target_dir.iterdir()):
+        if not force:
+            raise FileExistsError(f"Target directory {target_dir} exists and is not empty. Use --force to overwrite.")
+        if not _is_safe_to_overwrite(target_dir):
+            raise ValueError(
+                f"Refusing to force-overwrite {target_dir}: directory does not contain '{SENTINEL_FILENAME}' "
+                f"or '.moosedev'. Please provide an empty directory or a previously materialized repository."
             )
         shutil.rmtree(target_dir)
 
@@ -88,18 +94,21 @@ def materialize_scenario(
     run_git("config", "user.name", "Benchmark Materializer")
     run_git("config", "user.email", "bench@alittlediff.local")
 
+    # Write sentinel file
+    (target_dir / SENTINEL_FILENAME).write_text(f"Scenario: {manifest.id}\nName: {manifest.name}\n", encoding="utf-8")
+
     # State A
     moose_dir = target_dir / ".moosedev"
     moose_dir.mkdir(parents=True, exist_ok=True)
-    (moose_dir / "kg.nq").write_text(data["state_a_nquads"], encoding="utf-8")
+    (moose_dir / "kg.nq").write_text(manifest.state_a_nquads, encoding="utf-8")
     run_git("add", ".")
-    run_git("commit", "--allow-empty", "-m", f"State A: {name}")
+    run_git("commit", "--allow-empty", "-m", f"State A: {manifest.name}")
     run_git("tag", "state_a")
 
     # State B
-    (moose_dir / "kg.nq").write_text(data["state_b_nquads"], encoding="utf-8")
+    (moose_dir / "kg.nq").write_text(manifest.state_b_nquads, encoding="utf-8")
     run_git("add", ".")
-    run_git("commit", "--allow-empty", "-m", f"State B: {name}")
+    run_git("commit", "--allow-empty", "-m", f"State B: {manifest.name}")
     run_git("tag", "state_b")
 
     return target_dir
@@ -113,14 +122,13 @@ def main():
     args = parser.parse_args()
 
     try:
-        out_path = materialize_scenario(args.scenario, Path(args.output_dir) if args.output_dir else None, force=args.force)
-        print(f"\nSuccessfully materialized scenario '{args.scenario}'!")
-        print(f"Location: {out_path.resolve()}\n")
-        print("Run epistemic diff with:")
-        print(f"  alittlediff diff state_a..state_b --repo \"{out_path.resolve()}\"\n")
+        out_path = materialize_scenario(args.scenario, output_dir=args.output_dir, force=args.force)
+        print(f"✅ Materialized scenario '{args.scenario}' to: {out_path}")
+        print("\nTo test with A Little Diff CLI:")
+        print(f"  alittlediff diff state_a..state_b --repo {out_path}")
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
+        print(f"❌ Error: {e}")
+        exit(1)
 
 
 if __name__ == "__main__":

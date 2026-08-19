@@ -1,8 +1,12 @@
-﻿"""Independent reference evaluator for differential testing.
+﻿"""Independent reference evaluator for differential causal impact testing.
 
-A deliberately simple, direct BFS implementation of causal impact traversal,
-kept completely separate from production code paths to prevent correlated bugs.
+A clean, direct adjacency-list and BFS queue implementation that traverses
+causal edges up to arbitrary max_depth. Kept completely separate from
+production code paths to prevent correlated implementation bugs.
 """
+
+from collections import deque
+from typing import Any
 
 REF_RULES = {
     "isMotivatedBy": ("reverse", "justification_may_have_changed", "high"),
@@ -20,61 +24,104 @@ REF_RULES = {
 
 
 def reference_find_impacts(
-    changes,
-    base_state,
-    head_state,
+    changes: list[Any],
+    base_state: Any,
+    head_state: Any,
     max_depth: int = 1,
 ) -> set[tuple[str, str, str, str]]:
-    """Compute impacts using a minimal BFS algorithm.
+    """Compute impacts using an independent adjacency-list BFS queue.
     
+    Args:
+        changes: EpistemicChange list from diff_states.
+        base_state: Baseline EpistemicState.
+        head_state: Target EpistemicState.
+        max_depth: Maximum traversal hops from trigger nodes.
+
     Returns:
         Set of (source_change_id, target_record_id, effect, confidence) tuples.
     """
+    # 1. Build adjacency structures across both base and head states
+    outgoing_edges: dict[str, list[tuple[str, str]]] = {}
+    incoming_edges: dict[str, list[tuple[str, str]]] = {}
+
+    all_records = list(base_state.records.values()) + list(head_state.records.values())
+    for rec in all_records:
+        for rel in rec.relations:
+            src = rel.subject_id
+            dst = rel.object_id
+            pred = rel.predicate
+
+            outgoing_edges.setdefault(src, []).append((pred, dst))
+            incoming_edges.setdefault(dst, []).append((pred, src))
+
     results: set[tuple[str, str, str, str]] = set()
     seen_keys: set[tuple[str, str]] = set()
 
     for chg in changes:
-        triggers = set()
-        if chg.structural_type == "superseded":
-            if chg.before:
-                triggers.add(chg.before.id)
-            if chg.after:
-                triggers.add(chg.after.id)
-            if "superseded_id" in chg.details:
-                triggers.add(chg.details["superseded_id"])
-            if "superseding_id" in chg.details:
-                triggers.add(chg.details["superseding_id"])
-        elif chg.structural_type in ("removed", "status_changed", "modified"):
-            if chg.before:
-                triggers.add(chg.before.id)
-            if chg.after:
-                triggers.add(chg.after.id)
+        triggers = _extract_triggers(chg)
 
         for trigger_id in triggers:
-            # 1. Reverse traversal: records pointing to trigger_id
-            all_records = list(base_state.records.values()) + list(head_state.records.values())
-            for rec in all_records:
-                if rec.id == trigger_id:
-                    continue
-                for rel in rec.relations:
-                    if rel.object_id == trigger_id and rel.predicate in REF_RULES:
-                        direction, effect, conf = REF_RULES[rel.predicate]
-                        if direction in ("reverse", "both"):
-                            _ref_add(results, seen_keys, chg.change_id, rec.id, effect, conf, head_state, base_state)
+            # BFS queue: (current_node, current_depth)
+            queue = deque([(trigger_id, 1)])
+            visited = {trigger_id}
 
-            # 2. Forward traversal: relations originating from trigger_id
-            trigger_recs = [r for r in (base_state.get_record(trigger_id), head_state.get_record(trigger_id)) if r]
-            for trigger_rec in trigger_recs:
-                for rel in trigger_rec.relations:
-                    if rel.predicate in REF_RULES:
-                        direction, effect, conf = REF_RULES[rel.predicate]
+            while queue:
+                curr_node, curr_depth = queue.popleft()
+                if curr_depth > max_depth:
+                    continue
+
+                # Reverse causal propagation: records pointing to curr_node
+                for pred, src_id in incoming_edges.get(curr_node, []):
+                    if pred in REF_RULES:
+                        direction, effect, conf = REF_RULES[pred]
+                        if direction in ("reverse", "both"):
+                            _ref_add(results, seen_keys, chg.change_id, src_id, effect, conf, head_state, base_state)
+                            if curr_depth < max_depth and src_id not in visited:
+                                visited.add(src_id)
+                                queue.append((src_id, curr_depth + 1))
+
+                # Forward causal propagation: relations originating from curr_node
+                for pred, dst_id in outgoing_edges.get(curr_node, []):
+                    if pred in REF_RULES:
+                        direction, effect, conf = REF_RULES[pred]
                         if direction in ("forward", "both"):
-                            _ref_add(results, seen_keys, chg.change_id, rel.object_id, effect, conf, head_state, base_state)
+                            _ref_add(results, seen_keys, chg.change_id, dst_id, effect, conf, head_state, base_state)
+                            if curr_depth < max_depth and dst_id not in visited:
+                                visited.add(dst_id)
+                                queue.append((dst_id, curr_depth + 1))
 
     return results
 
 
-def _ref_add(results, seen_keys, change_id, target_id, effect, confidence, head_state, base_state):
+def _extract_triggers(chg: Any) -> set[str]:
+    triggers = set()
+    if chg.structural_type == "superseded":
+        if chg.before:
+            triggers.add(chg.before.id)
+        if chg.after:
+            triggers.add(chg.after.id)
+        if "superseded_id" in chg.details:
+            triggers.add(chg.details["superseded_id"])
+        if "superseding_id" in chg.details:
+            triggers.add(chg.details["superseding_id"])
+    elif chg.structural_type in ("removed", "status_changed", "modified"):
+        if chg.before:
+            triggers.add(chg.before.id)
+        if chg.after:
+            triggers.add(chg.after.id)
+    return triggers
+
+
+def _ref_add(
+    results: set[tuple[str, str, str, str]],
+    seen_keys: set[tuple[str, str]],
+    change_id: str,
+    target_id: str,
+    effect: str,
+    confidence: str,
+    head_state: Any,
+    base_state: Any,
+):
     key = (change_id, target_id)
     if key in seen_keys:
         return
