@@ -1,0 +1,25 @@
+{
+  "id": "04_operational_consequence",
+  "name": "Operational Consequence Invalidation",
+  "category": "world_update",
+  "description": "Updating a worker queueing decision alerts its operational latency consequence.",
+  "state_a_nquads": "<urn:rec:dec:queue> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:queue> <https://moosedev.org/ontology/hasTitle> \"Synchronous batch worker\" .\n<urn:rec:dec:queue> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:queue> <https://moosedev.org/ontology/resultsIn> <urn:rec:conseq:latency> .\n\n<urn:rec:conseq:latency> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Consequence> .\n<urn:rec:conseq:latency> <https://moosedev.org/ontology/hasTitle> \"Batch reindexing blocks HTTP handler for 15s\" .\n<urn:rec:conseq:latency> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .",
+  "state_b_nquads": "<urn:rec:dec:queue> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:queue> <https://moosedev.org/ontology/hasTitle> \"Synchronous batch worker\" .\n<urn:rec:dec:queue> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:dec:queue> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:dec:queue_async> .\n\n<urn:rec:dec:queue_async> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:queue_async> <https://moosedev.org/ontology/hasTitle> \"Asynchronous Redis background queue\" .\n<urn:rec:dec:queue_async> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:queue_async> <https://moosedev.org/ontology/supersedes> <urn:rec:dec:queue> .\n\n<urn:rec:conseq:latency> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Consequence> .\n<urn:rec:conseq:latency> <https://moosedev.org/ontology/hasTitle> \"Batch reindexing blocks HTTP handler for 15s\" .\n<urn:rec:conseq:latency> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .",
+  "expected_changes": [
+    {
+      "structural_type": "superseded"
+    }
+  ],
+  "expected_impacts": [
+    {
+      "target_id": "urn:rec:conseq:latency",
+      "effect": "consequence_may_have_changed",
+      "confidence": "medium",
+      "predicate": "resultsIn"
+    }
+  ],
+  "expected_non_impacts": [],
+  "metamorphic_invariants": [
+    "line_order_permutation"
+  ]
+}

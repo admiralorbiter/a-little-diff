@@ -1,0 +1,27 @@
+{
+  "id": "02_workflow_confirmation_refinement",
+  "name": "Automated Workflow Confirmation Precondition",
+  "category": "refinement",
+  "description": "An automated state transition acquires a mandatory user confirmation precondition.",
+  "state_a_nquads": "<urn:rec:dec:1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:1> <https://moosedev.org/ontology/hasTitle> \"Automatic resource assignment\" .\n<urn:rec:dec:1> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n\n<urn:rec:dec:2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:2> <https://moosedev.org/ontology/hasTitle> \"Automatic session promotion\" .\n<urn:rec:dec:2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:2> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:dec:1> .",
+  "state_b_nquads": "<urn:rec:dec:1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:1> <https://moosedev.org/ontology/hasTitle> \"Automatic resource assignment\" .\n<urn:rec:dec:1> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:dec:1> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:dec:1_v2> .\n\n<urn:rec:dec:1_v2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:1_v2> <https://moosedev.org/ontology/hasTitle> \"Confirmed resource assignment with UI guard\" .\n<urn:rec:dec:1_v2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:1_v2> <https://moosedev.org/ontology/supersedes> <urn:rec:dec:1> .\n\n<urn:rec:dec:2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:2> <https://moosedev.org/ontology/hasTitle> \"Automatic session promotion\" .\n<urn:rec:dec:2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:2> <https://moosedev.org/ontology/isMotivatedBy> <urn:rec:dec:1> .",
+  "expected_changes": [
+    {
+      "structural_type": "superseded",
+      "semantic_type": "refinement"
+    }
+  ],
+  "expected_impacts": [
+    {
+      "target_id": "urn:rec:dec:2",
+      "effect": "justification_may_have_changed",
+      "confidence": "high",
+      "predicate": "isMotivatedBy"
+    }
+  ],
+  "expected_non_impacts": [],
+  "metamorphic_invariants": [
+    "line_order_permutation",
+    "unrelated_substrate_isolation"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "05_empirical_lesson_invalidation",
+  "name": "Empirical Lesson Context Change",
+  "category": "belief_revision",
+  "description": "An architectural decision changes, prompting review of lessons derived from it.",
+  "state_a_nquads": "<urn:rec:dec:lsp> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:lsp> <https://moosedev.org/ontology/hasTitle> \"Disk-range diagnostics alignment\" .\n<urn:rec:dec:lsp> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n\n<urn:rec:les:buffer> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Lesson> .\n<urn:rec:les:buffer> <https://moosedev.org/ontology/hasTitle> \"Correct disk ranges can be wrong for unsaved buffer\" .\n<urn:rec:les:buffer> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:les:buffer> <https://moosedev.org/ontology/learnedFrom> <urn:rec:dec:lsp> .",
+  "state_b_nquads": "<urn:rec:dec:lsp> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:lsp> <https://moosedev.org/ontology/hasTitle> \"Disk-range diagnostics alignment\" .\n<urn:rec:dec:lsp> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:dec:lsp> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:dec:lsp_mem> .\n\n<urn:rec:dec:lsp_mem> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:lsp_mem> <https://moosedev.org/ontology/hasTitle> \"In-memory virtual AST coordinate alignment\" .\n<urn:rec:dec:lsp_mem> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:lsp_mem> <https://moosedev.org/ontology/supersedes> <urn:rec:dec:lsp> .\n\n<urn:rec:les:buffer> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Lesson> .\n<urn:rec:les:buffer> <https://moosedev.org/ontology/hasTitle> \"Correct disk ranges can be wrong for unsaved buffer\" .\n<urn:rec:les:buffer> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:les:buffer> <https://moosedev.org/ontology/learnedFrom> <urn:rec:dec:lsp> .",
+  "expected_changes": [
+    {
+      "structural_type": "superseded"
+    }
+  ],
+  "expected_impacts": [
+    {
+      "target_id": "urn:rec:les:buffer",
+      "effect": "lesson_context_changed",
+      "confidence": "medium",
+      "predicate": "learnedFrom"
+    }
+  ],
+  "expected_non_impacts": [],
+  "metamorphic_invariants": [
+    "line_order_permutation"
+  ]
+}

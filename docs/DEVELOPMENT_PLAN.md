@@ -269,7 +269,7 @@ A → B
 1 explicit supersession
 1 downstream item worth inspecting
 
-BELIEF SUPERSEDED
+RECORD SUPERSEDED
 ...
 
 WHY IT MATTERS

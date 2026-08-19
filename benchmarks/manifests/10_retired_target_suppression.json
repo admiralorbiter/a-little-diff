@@ -1,0 +1,20 @@
+{
+  "id": "10_retired_target_suppression",
+  "name": "Retired Target Alert Suppression",
+  "category": "semantic_noop",
+  "description": "An upstream premise changes, but the downstream target is already retracted/retired.",
+  "state_a_nquads": "<urn:rec:con:auth> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:auth> <https://moosedev.org/ontology/hasTitle> \"OAuth token expiry 1 hour\" .\n<urn:rec:con:auth> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:auth> <https://moosedev.org/ontology/constrains> <urn:rec:dec:session> .\n\n<urn:rec:dec:session> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:session> <https://moosedev.org/ontology/hasTitle> \"In-memory token caching\" .\n<urn:rec:dec:session> <https://moosedev.org/ontology/hasLifecycleStatus> \"retracted\" .",
+  "state_b_nquads": "<urn:rec:con:auth> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:auth> <https://moosedev.org/ontology/hasTitle> \"OAuth token expiry 1 hour\" .\n<urn:rec:con:auth> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:con:auth> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:con:auth_v2> .\n\n<urn:rec:con:auth_v2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:auth_v2> <https://moosedev.org/ontology/hasTitle> \"OAuth token expiry 24 hours\" .\n<urn:rec:con:auth_v2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:auth_v2> <https://moosedev.org/ontology/supersedes> <urn:rec:con:auth> .\n\n<urn:rec:dec:session> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:session> <https://moosedev.org/ontology/hasTitle> \"In-memory token caching\" .\n<urn:rec:dec:session> <https://moosedev.org/ontology/hasLifecycleStatus> \"retracted\" .",
+  "expected_changes": [
+    {
+      "structural_type": "superseded"
+    }
+  ],
+  "expected_impacts": [],
+  "expected_non_impacts": [
+    "urn:rec:dec:session"
+  ],
+  "metamorphic_invariants": [
+    "line_order_permutation"
+  ]
+}

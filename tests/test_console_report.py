@@ -116,7 +116,7 @@ def test_console_report_rich_rendering_with_impacts():
     output = out.getvalue()
 
     assert "A LITTLE DIFF" in output
-    assert "BELIEF SUPERSEDED" in output
+    assert "RECORD SUPERSEDED" in output
     assert "BEFORE:" in output
     assert "AFTER:" in output
     assert "ADDED" in output
@@ -166,7 +166,7 @@ def test_cli_diff_console_output_supersession_and_impact(tmp_path: Path):
     result = runner.invoke(app, ["diff", "state_a..HEAD", "--repo", str(repo)])
     assert result.exit_code == 0
     assert "A LITTLE DIFF" in result.stdout
-    assert "BELIEF SUPERSEDED" in result.stdout
+    assert "RECORD SUPERSEDED" in result.stdout
     assert "RECONSIDER" in result.stdout
     assert "Manual attendance workflow" in result.stdout
 

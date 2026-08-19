@@ -687,7 +687,7 @@ Embeddings become useful when adapters need to align semantically equivalent but
 ```text
 "External coordinators require local credentials."
 
-"Non-PREP-KC users authenticate through username/password."
+"Non-organization external users authenticate through username/password."
 ```
 
 Future process:

@@ -1,0 +1,27 @@
+{
+  "id": "03_constraint_refinement",
+  "name": "Invariant Constraint Narrowing",
+  "category": "refinement",
+  "description": "A database access constraint is tightened, flagging governed architectural decisions.",
+  "state_a_nquads": "<urn:rec:con:1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:1> <https://moosedev.org/ontology/hasTitle> \"Direct SQL access permitted for analytics\" .\n<urn:rec:con:1> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:1> <https://moosedev.org/ontology/constrains> <urn:rec:dec:analytics> .\n\n<urn:rec:dec:analytics> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:analytics> <https://moosedev.org/ontology/hasTitle> \"Reporting dashboard ETL pipeline\" .\n<urn:rec:dec:analytics> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .",
+  "state_b_nquads": "<urn:rec:con:1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:1> <https://moosedev.org/ontology/hasTitle> \"Direct SQL access permitted for analytics\" .\n<urn:rec:con:1> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:con:1> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:con:2> .\n\n<urn:rec:con:2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:2> <https://moosedev.org/ontology/hasTitle> \"Analytics must use tenant-isolated read replica API\" .\n<urn:rec:con:2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:2> <https://moosedev.org/ontology/supersedes> <urn:rec:con:1> .\n<urn:rec:con:2> <https://moosedev.org/ontology/constrains> <urn:rec:dec:analytics> .\n\n<urn:rec:dec:analytics> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:analytics> <https://moosedev.org/ontology/hasTitle> \"Reporting dashboard ETL pipeline\" .\n<urn:rec:dec:analytics> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .",
+  "expected_changes": [
+    {
+      "structural_type": "superseded",
+      "semantic_type": "refinement"
+    }
+  ],
+  "expected_impacts": [
+    {
+      "target_id": "urn:rec:dec:analytics",
+      "effect": "constraint_context_changed",
+      "confidence": "high",
+      "predicate": "constrains"
+    }
+  ],
+  "expected_non_impacts": [],
+  "metamorphic_invariants": [
+    "line_order_permutation",
+    "inverse_relation_equivalence"
+  ]
+}

@@ -171,7 +171,7 @@ alittlediff diff 4f76c5bc..2b7d733d --repo /path/to/project
 
 71 meaningful knowledge changes  •  55 explicit supersessions  •  54 downstream items worth inspecting
 
-╭──────────────────────── BELIEF SUPERSEDED ────────────────────────╮
+╭──────────────────────── RECORD SUPERSEDED ────────────────────────╮
 │ BEFORE: Constraint                                                │
 │   Teacher attendance must be entered manually.                    │
 │                                                                   │
@@ -207,7 +207,8 @@ alittlediff diff 4f76c5bc..2b7d733d --repo /path/to/project
 
 ## Documentation Map
 
-- [`docs/POLARIS_AND_MOOSEDEV_EVALUATION_WRITEUP.md`](docs/POLARIS_AND_MOOSEDEV_EVALUATION_WRITEUP.md) — comprehensive trial report, prospective experimental protocol, and dual case studies (Polaris & MOOSEDev).
+- [`docs/RETROSPECTIVE_CALIBRATION_REPORT.md`](docs/RETROSPECTIVE_CALIBRATION_REPORT.md) — comprehensive trial report, prospective experimental protocol, and dual case studies.
+- [`docs/BENCHMARK.md`](docs/BENCHMARK.md) — benchmark suite specification (Core Bench, Capture Bench, Semantic Bench, Metamorphic Invariants).
 - [`docs/V0_EVALUATION_REPORT.md`](docs/V0_EVALUATION_REPORT.md) — baseline MOOSEDev production trial report and evaluation synthesis.
 - [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md) — purpose, product model, terminology, scope, non-goals, and long-term vision.
 - [`docs/RESEARCH_FOUNDATIONS.md`](docs/RESEARCH_FOUNDATIONS.md) — research synthesis and the specific features or design rules it suggests.

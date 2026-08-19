@@ -108,7 +108,7 @@ def _render_change_card(chg: EpistemicChange, console: Console, verbose: bool = 
     stype = chg.structural_type
 
     if stype == "superseded":
-        title_text = "[bold yellow]BELIEF SUPERSEDED[/bold yellow]"
+        title_text = "[bold yellow]RECORD SUPERSEDED[/bold yellow]"
         content = []
         if chg.before:
             claim_text = escape(chg.before.claim or chg.before.title or "Unknown")

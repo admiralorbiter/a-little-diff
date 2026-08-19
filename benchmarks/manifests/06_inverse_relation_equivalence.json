@@ -1,0 +1,25 @@
+{
+  "id": "06_inverse_relation_equivalence",
+  "name": "Direct vs Inverse Predicate Equivalence",
+  "category": "refinement",
+  "description": "Inverse relation isConstrainedBy produces equivalent impact to direct constrains.",
+  "state_a_nquads": "<urn:rec:con:strict> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:strict> <https://moosedev.org/ontology/hasTitle> \"Strict tenant scoping\" .\n<urn:rec:con:strict> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n\n<urn:rec:dec:queries> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:queries> <https://moosedev.org/ontology/hasTitle> \"Portal query handlers\" .\n<urn:rec:dec:queries> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:queries> <https://moosedev.org/ontology/isConstrainedBy> <urn:rec:con:strict> .",
+  "state_b_nquads": "<urn:rec:con:strict> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:strict> <https://moosedev.org/ontology/hasTitle> \"Strict tenant scoping\" .\n<urn:rec:con:strict> <https://moosedev.org/ontology/hasLifecycleStatus> \"superseded\" .\n<urn:rec:con:strict> <https://moosedev.org/ontology/isSupersededBy> <urn:rec:con:strict_v2> .\n\n<urn:rec:con:strict_v2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Constraint> .\n<urn:rec:con:strict_v2> <https://moosedev.org/ontology/hasTitle> \"Strict tenant scoping with org inheritance\" .\n<urn:rec:con:strict_v2> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:con:strict_v2> <https://moosedev.org/ontology/supersedes> <urn:rec:con:strict> .\n\n<urn:rec:dec:queries> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://moosedev.org/ontology/Decision> .\n<urn:rec:dec:queries> <https://moosedev.org/ontology/hasTitle> \"Portal query handlers\" .\n<urn:rec:dec:queries> <https://moosedev.org/ontology/hasLifecycleStatus> \"accepted\" .\n<urn:rec:dec:queries> <https://moosedev.org/ontology/isConstrainedBy> <urn:rec:con:strict> .",
+  "expected_changes": [
+    {
+      "structural_type": "superseded"
+    }
+  ],
+  "expected_impacts": [
+    {
+      "target_id": "urn:rec:dec:queries",
+      "effect": "constraint_context_changed",
+      "confidence": "high",
+      "predicate": "isConstrainedBy"
+    }
+  ],
+  "expected_non_impacts": [],
+  "metamorphic_invariants": [
+    "line_order_permutation"
+  ]
+}

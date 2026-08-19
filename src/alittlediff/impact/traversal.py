@@ -51,8 +51,12 @@ def find_impacts(
         if chg.structural_type == "superseded":
             if chg.before:
                 trigger_ids.add(chg.before.id)
+            if chg.after:
+                trigger_ids.add(chg.after.id)
             if "superseded_id" in chg.details:
                 trigger_ids.add(chg.details["superseded_id"])
+            if "superseding_id" in chg.details:
+                trigger_ids.add(chg.details["superseding_id"])
         elif chg.structural_type in ("removed", "status_changed", "modified"):
             if chg.before:
                 trigger_ids.add(chg.before.id)
@@ -85,8 +89,9 @@ def find_impacts(
                             )
 
             # 2. Forward traversal: relations originating FROM trigger_id pointing to target (e.g. Action --resultsIn--> Effect)
-            trigger_rec = head_state.get_record(trigger_id) or base_state.get_record(trigger_id)
-            if trigger_rec:
+            # Check relations originating from trigger_id in BOTH base_state AND head_state
+            trigger_recs = [r for r in (base_state.get_record(trigger_id), head_state.get_record(trigger_id)) if r]
+            for trigger_rec in trigger_recs:
                 for rel in trigger_rec.relations:
                     if rel.predicate in rules:
                         rule = rules[rel.predicate]
