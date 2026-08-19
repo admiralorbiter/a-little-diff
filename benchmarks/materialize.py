@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """Materialize a benchmark scenario into a live Git repository on disk.
 
 Translates an alittlediff-bench JSON manifest into a concrete Git repository
@@ -42,10 +42,7 @@ def _is_safe_to_overwrite(target_path: Path) -> bool:
         return True
     if not any(target_path.iterdir()):
         return True
-    # Safe if marked with our sentinel or contains .moosedev directory
-    if (target_path / SENTINEL_FILENAME).exists() or (target_path / ".moosedev").exists():
-        return True
-    return False
+    return (target_path / SENTINEL_FILENAME).is_file()
 
 
 def materialize_scenario(
@@ -79,8 +76,8 @@ def materialize_scenario(
             raise FileExistsError(f"Target directory {target_dir} exists and is not empty. Use --force to overwrite.")
         if not _is_safe_to_overwrite(target_dir):
             raise ValueError(
-                f"Refusing to force-overwrite {target_dir}: directory does not contain '{SENTINEL_FILENAME}' "
-                f"or '.moosedev'. Please provide an empty directory or a previously materialized repository."
+                f"Refusing to force-overwrite {target_dir}: directory does not contain '{SENTINEL_FILENAME}'. "
+                f"Please provide an empty directory or a previously materialized repository."
             )
         shutil.rmtree(target_dir)
 

@@ -1,4 +1,4 @@
-﻿# `alittlediff-bench`: Benchmark Suite Specification
+# `alittlediff-bench`: Benchmark Suite Specification
 
 `alittlediff-bench` is a public, synthetic, reproducible benchmark suite for evaluating epistemic diffing engines, knowledge graph extraction pipelines, and model-assisted semantic change classifiers.
 
@@ -28,6 +28,7 @@ flowchart TD
 * **Scope:** Verifies that given fixed Epistemic State A and Epistemic State B, `alittlediff` deterministically produces the exact expected structural changes, lifecycle supersessions, and causal impact traversals.
 * **Pass Criterion:** Strict equality against `core_expected` fields (`structural_type`, `expected_impacts`, `expected_non_impacts`).
 * **Requirements:** Local, deterministic, 0 LLM calls, zero external daemon dependencies.
+* **Multi-Hop Traversal Scope:** V0 multi-hop propagation is conservative and validated against canonical scenario `22_two_hop_reverse_chain` for supported two-hop reverse-chain behavior; the independent BFS reference evaluator is differentially validated at depth 1.
 
 ### 2. Capture Bench (Substrate Modeling Quality)
 * **Scope:** Tests whether the knowledge substrate (e.g. MOOSEDev) successfully captures the necessary causal topology from real development events.

@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
@@ -29,6 +29,23 @@ def test_materialize_refuses_foreign_dir_even_with_force(tmp_path: Path):
 
     with pytest.raises(ValueError, match="does not contain '.alittlediff_materialized'"):
         materialize_scenario("01_exact_noop", output_dir=target, force=True)
+
+
+def test_materialize_refuses_real_moosedev_repo_even_with_force(tmp_path: Path):
+    target = tmp_path / "real_project"
+    (target / ".moosedev").mkdir(parents=True)
+    (target / ".moosedev" / "kg.nq").write_text("real data")
+    (target / "app.py").write_text("important project")
+
+    with pytest.raises(ValueError, match="does not contain '.alittlediff_materialized'"):
+        materialize_scenario(
+            "01_exact_noop",
+            output_dir=target,
+            force=True,
+        )
+
+    assert (target / "app.py").exists()
+    assert (target / ".moosedev" / "kg.nq").read_text() == "real data"
 
 
 def test_materialize_overwrites_with_force_when_sentinel_present(tmp_path: Path):

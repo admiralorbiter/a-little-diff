@@ -1,4 +1,4 @@
-﻿"""Hypothesis property-based testing suite for universal epistemic invariants."""
+"""Hypothesis property-based testing suite for universal epistemic invariants."""
 
 from collections import Counter
 import random
@@ -75,7 +75,7 @@ def causal_state_transition(draw):
     state_a_nquads = _build_nquads(records)
 
     # Derive State B by applying an operation
-    op = draw(st.sampled_from(["add", "modify", "supersede", "retract", "relate", "inverse_rel"]))
+    op = draw(st.sampled_from(["add", "modify", "supersede", "retract", "relate", "remove_relation"]))
     records_b = {k: {"kind": v["kind"], "status": v["status"], "title": v["title"], "relations": list(v["relations"])} for k, v in records.items()}
 
     if op == "add":
@@ -108,6 +108,13 @@ def causal_state_transition(draw):
         dst = draw(st.sampled_from([r for r in record_ids if r != src]))
         pred = draw(st.sampled_from(PREDICATES))
         records_b[src]["relations"].append((pred, dst))
+    elif op == "remove_relation":
+        nodes_with_rels = [rid for rid, rdata in records_b.items() if rdata["relations"]]
+        if nodes_with_rels:
+            target = draw(st.sampled_from(nodes_with_rels))
+            records_b[target]["relations"].pop()
+        else:
+            op = "noop"
 
     state_b_nquads = _build_nquads(records_b)
     return state_a_nquads, state_b_nquads, op
