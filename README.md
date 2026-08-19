@@ -201,13 +201,14 @@ alittlediff diff 4f76c5bc..2b7d733d --repo /path/to/project
 - [x] **Milestone 4: Rich Terminal Console Report:** Formatted before/after cards and downstream reconsider panels.
 - [x] **Milestone 5: Policy-Driven Impact Engine:** Conservative typed relationship propagation (`isMotivatedBy`, `constrains`, `dependsOn`, `resultsIn`, `concerns`, `justifiedBy`) preserving historical motivations.
 - [x] **Milestone 6: Real-Project Evaluation:** Live-verified against 3,334 production knowledge records in `Trivyn/moosedev`.
-- [x] **Golden Test Suite:** 49 tests passing at 95% total code coverage.
+- [x] **Golden Test Suite:** 57 tests passing at 95% total code coverage.
 
 ---
 
 ## Documentation Map
 
-- [`docs/V0_EVALUATION_REPORT.md`](docs/V0_EVALUATION_REPORT.md) — comprehensive real-world trial report and evaluation synthesis.
+- [`docs/POLARIS_AND_MOOSEDEV_EVALUATION_WRITEUP.md`](docs/POLARIS_AND_MOOSEDEV_EVALUATION_WRITEUP.md) — comprehensive trial report, prospective experimental protocol, and dual case studies (Polaris & MOOSEDev).
+- [`docs/V0_EVALUATION_REPORT.md`](docs/V0_EVALUATION_REPORT.md) — baseline MOOSEDev production trial report and evaluation synthesis.
 - [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md) — purpose, product model, terminology, scope, non-goals, and long-term vision.
 - [`docs/RESEARCH_FOUNDATIONS.md`](docs/RESEARCH_FOUNDATIONS.md) — research synthesis and the specific features or design rules it suggests.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — proposed technical architecture, data model, MOOSEDev seam, Ollama integration, and package layout.
