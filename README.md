@@ -1,3 +1,59 @@
+# A Little Diff (`a-little-diff`) — Epistemic Change & Project Truth-Maintenance Tool
+
+> **Status:** `[PUBLIC / ACTIVE DEV & RETURNABLE — DETERMINISTIC V0 COMPLETE]` (August 18–19, 2026: ~5-hour build / 158 tests passed) — Kept Public  
+> **Science Book Status:** `[METHODS / INSTRUMENT: 2026-08-18-epistemic-diffing-truth-maintenance]` (Indexed in Science Book Methods)  
+> **Host Environment:** Python 3.11+, RDF / N-Quads (MOOSEDev), Pytest, Hypothesis  
+> **Portfolio Reference:** [`bigbraintime/projects/a-little-diff-epistemic-change.md`](https://github.com/admiralorbiter/bigbraintime)  
+
+---
+
+## Retrospective Architecture & Epistemic Foundations
+
+### 1. Paradigm: Comparing Project Understanding vs. File Content
+
+*A Little Diff* compares **evolving project models and belief states** rather than raw lines of source code:
+
+```text
+       ┌────────────────────────────────────────────────────────┐
+       │             PROJECT EPISTEMIC REPOSITORY               │
+       └──────────────────────────┬─────────────────────────────┘
+                                  │
+        ┌─────────────────────────┴─────────────────────────┐
+        ▼                                                   ▼
+ [ EPISTEMIC STATE A (git:revA) ]            [ EPISTEMIC STATE B (git:revB) ]
+ ├── Decisions, Constraints, Lessons         ├── Decisions, Constraints, Lessons
+ └── RDF N-Quads Entity Graph                └── RDF N-Quads Entity Graph
+        │                                                   │
+        └─────────────────────────┬─────────────────────────┘
+                                  ▼
+                    [ STRUCTURED EPISTEMIC DIFF ]
+                      ├── Identifies Changed Premises & Decisions
+                      ├── Collapses Structural Supersession Chains
+                      └── Typed Directional Impact Propagation:
+                          • Constraint -> Decision (High)
+                          • Motivating Premise -> Decision (High)
+                          • Decision -> Consequence (Medium)
+                                  │
+                                  ▼
+             [ DOWNSTREAM RECONSIDERATION CANDIDATE SET ]
+             "What few things now require cognitive review?"
+```
+
+### 2. Core Implemented Discoveries & Invariants
+
+1. **Structural Supersession $
+eq$ Semantic Revision:** A decision superseded in a knowledge graph may represent a security tightening or refinement rather than an empirical rejection. (Rule: *Models interpret; code maintains truth*).
+2. **Graph Reachability $
+eq$ Causal Impact:** Pure graph distance produces noise. Propagation requires typed, directional semantics; downstream decisions do not propagate backwards to invalidate governing constraints.
+3. **Consequences Matter More than Change Summaries:** The cognitive value of an epistemic diff is not the description of what changed, but the precise identification of the 2–3 downstream assumptions that now deserve human review.
+
+### 3. The "Single Poker in the Fire" Resumption Gate (`ALD-E1: PROSPECTIVE USEFUL SURPRISE`)
+
+- **Protocol:** Select one actively developed, personally authored repository with structured epistemic history.
+- **Evaluation:** Before running `a-little-diff`, spend 60 seconds listing expected conceptual changes. Run the tool, and measure whether it surfaces at least one **Useful Surprise**—a valid downstream consequence that the developer failed to anticipate.
+
+---
+
 # A Little Diff
 
 > **Technical operation:** an *epistemic diff*  
